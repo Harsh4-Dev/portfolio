@@ -497,7 +497,7 @@ export function createScene(canvas, opts = {}) {
     }
     if (aspect < 0.95) return { x: w * 0.12, y: 1.5, s: 0.5, o: asideOpacity * 0.45 };
     if (aspect < 1.3) return { x: w * 0.25, y: 0, s: 0.65, o: asideOpacity * 0.8 };
-    return { x: w * 0.28, y: 0, s: 0.78, o: asideOpacity };
+    return { x: w * 0.32, y: 0, s: 0.74, o: asideOpacity };
   }
 
   function resize() {
