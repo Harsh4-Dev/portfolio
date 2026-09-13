@@ -1,5 +1,7 @@
 /* cv.js — a classic, printable CV rendered from the same content.json. */
-import { loadContent, esc, splitList, splitLinks, dateRange, fmtDate, md, applyTheme, hrefOf, yes } from './content.js';
+import { loadContent, esc, splitList, splitLinks, dateRange, fmtDate, md, applyTheme, hrefOf, yes, makeText, flag } from './content.js';
+
+let T = (k, d) => d;
 import { doodle } from './doodles.js';
 
 const SKIP_LAYOUTS = new Set(['contact', 'gallery']);
@@ -11,7 +13,7 @@ function entry(it) {
     <div><span class="t">${esc(it.title || it.role || it.label || '')}</span>${it.org || it.company ? ` — <span class="o">${esc(it.org || it.company)}</span>` : ''}${it.subtitle ? ` <span class="l">· ${esc(it.subtitle)}</span>` : ''}${it.location ? ` <span class="l">· ${esc(it.location)}</span>` : ''}</div>
     <div class="d">${esc(dateRange(it))}</div>
     ${it.description || it.summary ? `<div class="desc">${md(it.description || it.summary)}</div>` : ''}
-    ${tags.length || links.length ? `<div class="tags">${tags.length ? `<b>Tools:</b> ${esc(tags.join(', '))}` : ''}${links.length ? ` ${links.map((l) => `· <a href="${esc(hrefOf(l.url))}">${esc(l.label)}</a>`).join(' ')}` : ''}</div>` : ''}
+    ${tags.length || links.length ? `<div class="tags">${tags.length ? `<b>${esc(T('cv_tools', 'Tools:'))}</b> ${esc(tags.join(', '))}` : ''}${links.length ? ` ${links.map((l) => `· <a href="${esc(hrefOf(l.url))}">${esc(l.label)}</a>`).join(' ')}` : ''}</div>` : ''}
   </div>`;
 }
 
@@ -46,12 +48,15 @@ async function main() {
   let C;
   try { C = await loadContent(); } catch (e) { root.innerHTML = `<p>Could not load content.json (${esc(e.message)}). Run <code>python studio.py</code>.</p>`; return; }
   const S = C.settings || {};
+  T = makeText(C);
   applyTheme(S);
   if (!yes(S.show_grain ?? 'yes')) document.body.classList.add('no-grain');
   document.title = `${S.name || 'CV'} — ${S.cv_title || 'Curriculum Vitae'}`;
+  const back = document.querySelector('.cv-tools a'); if (back) back.textContent = T('cv_back', '← Portfolio');
+  const print = document.querySelector('.cv-tools button'); if (print) print.textContent = T('cv_print', 'Print / Save as PDF');
   const links = (C.links || []).filter((l) => l.show_in !== 'none' && !(S.email && l.url.toLowerCase() === `mailto:${S.email.toLowerCase()}`));
-  const contact = [S.email && `<a href="mailto:${esc(S.email)}">${esc(S.email)}</a>`, S.phone && esc(S.phone), S.location && esc(S.location), ...links.map((l) => `<a href="${esc(hrefOf(l.url))}">${esc(l.url.replace(/^(https?:\/\/(www\.)?|mailto:)/, ''))}</a>`)].filter(Boolean);
-  const sections = (C.sections || []).filter((s) => s.visible !== false && !SKIP_LAYOUTS.has(s.layout));
+  const contact = [S.email && `<a href="mailto:${esc(S.email)}">${esc(S.email)}</a>`, S.phone && esc(S.phone), flag(S, 'show_location') && S.location && esc(S.location), ...links.map((l) => `<a href="${esc(hrefOf(l.url))}">${esc(l.url.replace(/^(https?:\/\/(www\.)?|mailto:)/, ''))}</a>`)].filter(Boolean);
+  const sections = (C.sections || []).filter((s) => s.visible !== false && s.show_in_cv !== false && !SKIP_LAYOUTS.has(s.layout));
   root.innerHTML = `
     <header class="cv-head">
       <div><h1>${esc(S.name || '')}</h1>${S.tagline ? `<p class="tag">${esc(S.tagline)}</p>` : ''}</div>
@@ -59,6 +64,6 @@ async function main() {
     </header>
     ${S.headline ? `<p class="cv-text">${esc(S.headline)}</p>` : ''}
     ${sections.map((s) => section(s, C.data[s.id] || [])).join('')}
-    <p class="l" style="margin-top:2rem;font-size:.8rem;color:var(--ink-faint)">Generated from ${esc(C.source || 'content.xlsx')} · ${esc((C.generated_at || '').slice(0, 10))}</p>`;
+    ${flag(S, 'show_generated_line') ? `<p class="l" style="margin-top:2rem;font-size:.8rem;color:var(--ink-faint)">${esc(T('cv_generated', 'Generated from {source} · {date}', { source: C.source || 'content.xlsx', date: (C.generated_at || '').slice(0, 10) }))}</p>` : ''}`;
 }
 main();

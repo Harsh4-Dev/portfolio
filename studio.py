@@ -200,6 +200,7 @@ ol{padding-left:1.2rem}li{margin:.3rem 0}
   <div class="k">Workbook</div><div class="v" id="xlsx"></div>
   <div class="k" style="margin-top:.5rem">Last build</div><div class="v" id="last"></div>
   <div class="k" style="margin-top:.5rem">Status</div><div id="status"></div>
+  <div class="k" style="margin-top:.5rem">Will publish</div><div id="plan" class="v"></div>
   <p class="k">Save the workbook in Excel and the preview reloads by itself.</p>
  </div>
  <div class="card"><h2>GitHub</h2>
@@ -219,6 +220,7 @@ const $=s=>document.querySelector(s);
 async function refresh(){const r=await fetch('/__studio/state');const s=await r.json();
 $('#xlsx').textContent=s.xlsx+(s.exists?'':'  (missing!)');$('#last').textContent=s.last_build||'not built yet';
 $('#status').innerHTML=s.error?`<span class="err">✖ ${esc(s.error)}</span>`:(s.warnings.length?`<span class="warn">⚠ ${s.warnings.length} warning(s)</span><ol>${s.warnings.map(w=>`<li class="warn">${esc(w)}</li>`).join('')}</ol>`:'<span class="ok">✔ all good</span>');
+const p=s.plan;$('#plan').innerHTML=p?`theme <b>${esc(p.theme)}</b>${p.theme_toggle?' (+ toggle)':''} · pages: ${p.pages.map(x=>`<span class="pill">${esc(x)}</span>`).join(' ')}<br><span class="k">paper:</span> ${esc(p.sections.paper.join(', '))||'—'}<br><span class="k">terminal:</span> ${esc(p.sections.terminal.join(', '))||'—'}<br><span class="k">cv:</span> ${esc(p.cv_sections.join(', '))||'—'}`:'—';
 const g=s.git;$('#git').innerHTML=!g.is_repo?'<span class="pill">not a git repo yet</span>':`<div class="k">Remote</div><div class="v">${esc(g.remote)||'<span class="warn">none</span>'}</div><div class="k">Branch · changes</div><div class="v">${esc(g.branch)} · ${g.dirty} file(s) changed</div><div class="k">Last commit</div><div class="v">${esc(g.last_commit)||'—'}</div>${g.pages_url?`<div class="k">Live site</div><div class="v"><a href="${g.pages_url}" target="_blank">${g.pages_url}</a></div><div class="row"><a class="btn" href="${g.actions_url}" target="_blank">Actions</a><a class="btn" href="${g.settings_url}" target="_blank">Pages settings</a></div>`:''}`;
 if(g.remote&&!$('#remote').value)$('#remote').value=g.remote;$('#log').textContent=s.log.join('\\n');$('#log').scrollTop=1e9;}
 function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
@@ -266,6 +268,10 @@ class Handler(SimpleHTTPRequestHandler):
             with LOCK:
                 st = dict(STATE)
             st.update(xlsx=str(XLSX), exists=XLSX.exists(), git=git_state())
+            try:
+                st["plan"] = bc.plan(json.loads(JSON_OUT.read_text(encoding="utf-8")))
+            except Exception:  # noqa: BLE001
+                st["plan"] = None
             return self._json(st)
         return super().do_GET()
 

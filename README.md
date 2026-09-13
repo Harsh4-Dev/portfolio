@@ -55,6 +55,7 @@ Open `content.xlsx`. The `_README` sheet inside explains everything; the short v
 | `Sections` | one row per section: `id` (= sheet name), `title`, `eyebrow`, `intro`, `layout`, `order`, `era`, `doodle`, `columns`, `visible`, `cta_label`, `cta_link` |
 | `Journey` | the eras of the 3D story: `id`, `year`, `title`, `insight`, `shape`, `color` |
 | `Links` | social links: `label`, `url`, `icon`, `show_in` (all / nav / hero / footer / contact) |
+| `Text` | every word the site prints that is not your content: buttons, hints, prompt commands, help text, boot lines, footer. Change a value; delete the row to get the default back. `{placeholders}` are filled by the site. |
 | **any other sheet** | a section. Each row is an item, each column a field. |
 
 **Adding a section** = add a sheet, add a row in `Sections` to choose its layout/order/era. A sheet
@@ -116,6 +117,25 @@ forces one. The terminal prompt understands `help`, `ls`, `cat <section>`, `open
 `history`, `invert`, `theme paper`, `cv`, `email`, `top`, `clear`. Single keys when not typing:
 `h` home, `p` projects, `c` contact, `i` invert, `/` prompt, `?` help. If `Settings.avatar` is set the
 terminal hero shows it as an ASCII portrait; otherwise a rotating ASCII wireframe.
+
+### Show / hide — what gets published
+
+Every part of the site is a switch in `Settings` (yes/no): `show_nav`, `show_footer`,
+`show_scroll_cue`, `show_era_note`, `show_hero_note`, `show_roles`, `show_socials`, `show_location`,
+`show_availability`, `show_generated_line`, `show_journey_rail`, `show_grain`, `paper_modal`,
+`show_section_numbers`, `show_status_bar`, `show_clock`, `show_prompt`, `show_shortcuts`,
+`terminal_field`, `terminal_wireframe`, `terminal_banner` (ascii / text / none), `terminal_typing`,
+`terminal_boot`, `terminal_scanlines`, `theme_toggle`. Pages: `show_cv_page`, `show_history_page` —
+a page switched off is not linked and is **removed from the deployed site** by the workflow.
+
+Per section, in `Sections`: `visible` (anywhere), `themes` (all / paper / terminal), `show_in_nav`,
+`show_in_cv`, `nav_label` (menu text), `command` (custom terminal command such as `cat work.log`).
+Per era, in `Journey`: `visible`. Per row: `hidden`.
+
+The studio dashboard's **Will publish** line shows the resulting theme, pages and sections. New
+switches added by a later version of the site can be appended to your workbook with
+`python tools/upgrade_workbook.py` (needs openpyxl, keeps a `.bak.xlsx`); the site works without
+it, the defaults are built in.
 
 ### Images
 

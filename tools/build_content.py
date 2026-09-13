@@ -25,7 +25,7 @@ DEFAULT_JSON = ROOT / "site" / "content.json"
 
 LAYOUTS = {"timeline", "cards", "tags", "stats", "text", "list", "gallery", "table", "contact"}
 SHAPES = {"neuron", "perceptron", "mlp", "cnn", "deep", "transformer", "constellation"}
-META_SHEETS = {"settings", "sections", "journey", "links"}
+META_SHEETS = {"settings", "sections", "journey", "links", "text"}
 TRUE_WORDS = {"yes", "y", "true", "1", "x", "on"}
 
 # ------------------------------------------------------------------ minimal xlsx reader
@@ -240,11 +240,17 @@ def build(xlsx: Path = DEFAULT_XLSX) -> dict:
         if k:
             settings[_norm_key(k)] = r.get("value", "")
 
+    text = {}
+    for r in table("text"):
+        k = r.get("key")
+        if k:
+            text[_norm_key(k)] = str(r.get("value", ""))
+
     journey_rows = _sort(table("journey"))
     journey = []
     for j in journey_rows:
         jid = _norm_key(j.get("id") or j.get("shape") or j.get("title", ""))
-        if not jid:
+        if not jid or truthy(j.get("hidden", False)) or (j.get("visible", "") != "" and not truthy(j.get("visible"))):
             continue
         journey.append({
             "id": jid,
@@ -288,6 +294,11 @@ def build(xlsx: Path = DEFAULT_XLSX) -> dict:
             "cta_label": str(reg.get("cta_label", "")),
             "cta_link": str(reg.get("cta_link", "")),
             "count": len(items),
+            "themes": str(reg.get("themes", "all") or "all").strip().lower(),
+            "show_in_nav": truthy(reg.get("show_in_nav", "yes")) if reg.get("show_in_nav", "") != "" else True,
+            "show_in_cv": truthy(reg.get("show_in_cv", "yes")) if reg.get("show_in_cv", "") != "" else True,
+            "nav_label": str(reg.get("nav_label", "")),
+            "command": str(reg.get("command", "")),
         }
         for k, v in reg.items():  # keep any extra section-level columns too
             if k not in sec and k not in ("id",):
@@ -315,6 +326,7 @@ def build(xlsx: Path = DEFAULT_XLSX) -> dict:
         "generated_at": _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "source": xlsx.name,
         "settings": settings,
+        "text": text,
         "journey": journey,
         "links": links,
         "sections": sections,
@@ -349,6 +361,72 @@ def validate(content: dict, site_dir: Path = ROOT / "site") -> list[str]:
     return warns
 
 
+def plan(content: dict) -> dict:
+    """What the published site will contain, derived from Settings/Sections. Used by the studio and --prune."""
+    S = content["settings"]
+
+    def flag(k, d="yes"):
+        v = S.get(k, d)
+        return truthy(v) if str(v) != "" else truthy(d)
+
+    theme = str(S.get("theme", "paper")).strip().lower() or "paper"
+    toggle = flag("theme_toggle")
+    show_hist = flag("show_history_page", S.get("terminal_history", "yes"))
+    pages = ["index.html"]
+    if flag("show_cv_page"):
+        pages.append("cv.html")
+    if show_hist and (theme == "terminal" or toggle):
+        pages.append("history.html")
+    secs = {t: [s["id"] for s in content["sections"] if s["visible"] and s.get("themes", "all") in ("all", t)] for t in ("paper", "terminal")}
+    return {"theme": theme, "theme_toggle": toggle, "pages": pages, "sections": secs,
+            "cv_sections": [s["id"] for s in content["sections"] if s["visible"] and s.get("show_in_cv", True)]}
+
+
+def prune(content: dict, site_dir: Path = ROOT / "site") -> list[str]:
+    """Delete disabled pages from site_dir (used on the deploy runner, never by the studio)."""
+    removed = []
+    keep = set(plan(content)["pages"])
+    for page in ("cv.html", "history.html"):
+        f = site_dir / page
+        if page not in keep and f.exists():
+            f.unlink()
+            removed.append(page)
+    return removed
+
+
+def plan(content: dict) -> dict:
+    """What the published site will contain, derived from Settings/Sections. Used by the studio and --prune."""
+    S = content["settings"]
+
+    def flag(k, d="yes"):
+        v = S.get(k, d)
+        return truthy(v) if str(v) != "" else truthy(d)
+
+    theme = str(S.get("theme", "paper")).strip().lower() or "paper"
+    toggle = flag("theme_toggle")
+    show_hist = flag("show_history_page", S.get("terminal_history", "yes"))
+    pages = ["index.html"]
+    if flag("show_cv_page"):
+        pages.append("cv.html")
+    if show_hist and (theme == "terminal" or toggle):
+        pages.append("history.html")
+    secs = {t: [s["id"] for s in content["sections"] if s["visible"] and s.get("themes", "all") in ("all", t)] for t in ("paper", "terminal")}
+    return {"theme": theme, "theme_toggle": toggle, "pages": pages, "sections": secs,
+            "cv_sections": [s["id"] for s in content["sections"] if s["visible"] and s.get("show_in_cv", True)]}
+
+
+def prune(content: dict, site_dir: Path = ROOT / "site") -> list[str]:
+    """Delete disabled pages from site_dir (used on the deploy runner, never by the studio)."""
+    removed = []
+    keep = set(plan(content)["pages"])
+    for page in ("cv.html", "history.html"):
+        f = site_dir / page
+        if page not in keep and f.exists():
+            f.unlink()
+            removed.append(page)
+    return removed
+
+
 def write(content: dict, out: Path = DEFAULT_JSON) -> Path:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(content, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -356,6 +434,8 @@ def write(content: dict, out: Path = DEFAULT_JSON) -> Path:
 
 
 def main(argv: list[str]) -> int:
+    do_prune = "--prune" in argv
+    argv = [a for a in argv if a != "--prune"]
     xlsx = Path(argv[1]) if len(argv) > 1 else DEFAULT_XLSX
     out = Path(argv[2]) if len(argv) > 2 else DEFAULT_JSON
     if not xlsx.exists():
@@ -367,6 +447,11 @@ def main(argv: list[str]) -> int:
     print(f"wrote {out}  ({len(content['sections'])} sections, {n_items} items, {len(content['journey'])} eras)")
     for w in validate(content, out.parent):
         print("  warning:", w)
+    pl = plan(content)
+    print(f"theme: {pl['theme']} (toggle: {'yes' if pl['theme_toggle'] else 'no'}) · pages: {', '.join(pl['pages'])}")
+    if do_prune:
+        for page in prune(content, out.parent):
+            print("  pruned:", page)
     return 0
 
 

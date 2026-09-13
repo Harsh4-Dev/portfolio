@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-13T11:02:44Z",
+  "generated_at": "2026-09-13T11:38:25Z",
   "source": "content.xlsx",
   "settings": {
     "site_title": "Harshavardhan S - AI Systems Engineer",
@@ -51,7 +51,89 @@
     "terminal_font": "JetBrains Mono",
     "terminal_history": "yes",
     "terminal_boot": "yes",
-    "hero_note_terminal": ""
+    "hero_note_terminal": "",
+    "show_cv_page": "yes",
+    "show_history_page": "yes",
+    "show_nav": "yes",
+    "show_footer": "yes",
+    "show_scroll_cue": "yes",
+    "show_era_note": "yes",
+    "show_hero_note": "yes",
+    "show_roles": "yes",
+    "show_socials": "yes",
+    "show_location": "yes",
+    "show_availability": "yes",
+    "show_generated_line": "yes",
+    "show_section_numbers": "yes",
+    "show_status_bar": "yes",
+    "show_clock": "yes",
+    "show_prompt": "yes",
+    "show_shortcuts": "yes",
+    "terminal_field": "yes",
+    "terminal_wireframe": "yes",
+    "terminal_banner": "ascii",
+    "terminal_typing": "yes",
+    "paper_modal": "yes"
+  },
+  "text": {
+    "paper_hero_scroll": "scroll",
+    "paper_card_more": "read more",
+    "paper_link_open": "Open",
+    "paper_footer_cv": "CV page",
+    "paper_footer_top": "Back to top ↑",
+    "paper_footer_copyright": "© {year} {name}.",
+    "paper_footer_generated": "Content generated from {source} on {date}.",
+    "paper_empty_section": "Nothing here yet — add rows to the '{id}' sheet.",
+    "paper_theme_toggle": "Terminal",
+    "paper_menu": "Menu",
+    "paper_skip": "Skip to content",
+    "paper_loading": "warming up the perceptron",
+    "paper_modal_close": "Close",
+    "cv_back": "← Portfolio",
+    "cv_print": "Print / Save as PDF",
+    "cv_tools": "Tools:",
+    "cv_generated": "Generated from {source} · {date}",
+    "term_title": "{user}:~/portfolio",
+    "term_menu": "menu",
+    "term_tab_history": "history",
+    "term_tab_cv": "cv",
+    "term_tab_paper": "paper",
+    "term_whoami": "whoami",
+    "term_scroll_hint": "▼ scroll · ? for shortcuts · / to type a command",
+    "term_resume": "resume.pdf",
+    "term_cv_link": "cv",
+    "term_boot_cmd": "./portfolio --serve",
+    "term_boot_lines": "[ ok ] reading {source} ........ {items} items | [ ok ] mounting sections ........... {sections} | [ ok ] font grid ................... {grid} | [ ok ] warming up the wireframe",
+    "term_total": "total {n}",
+    "term_tags": "tags:",
+    "term_readme": "cat {name}/README.md",
+    "term_cmd_text": "cat {id}.md",
+    "term_cmd_stats": "./{id} --summary",
+    "term_cmd_timeline": "cat {id}.log",
+    "term_cmd_cards": "ls -la {id}/",
+    "term_cmd_tags": "tree {id}/",
+    "term_cmd_list": "cat {id}.txt",
+    "term_cmd_gallery": "ls {id}/*.png",
+    "term_cmd_table": "column -t {id}.tsv",
+    "term_cmd_contact": "cat contact.txt",
+    "term_prompt_placeholder": "help",
+    "term_keys": "h:home; p:projects; c:contact; i:invert; /:prompt; ?:help",
+    "term_help": "ls · cat <section> · open <project|n> · history · invert · theme paper · cv · email · top · clear",
+    "term_not_found": "bash: {cmd}: command not found (try help)",
+    "term_no_such_file": "cat: {arg}: no such file or directory",
+    "term_no_match": "open: nothing matches '{arg}' — projects: {list}",
+    "term_opening": "opening {title} …",
+    "term_goto": "→ {title}",
+    "term_sudo": "nice try.",
+    "term_exit": "there is no escape. try theme paper.",
+    "term_empty_section": "{id}: no entries yet — add rows to the '{sheet}' sheet",
+    "term_generated": "{note} — generated from {source} · {date}",
+    "term_uptime": "up {m}m{s}s",
+    "hist_cmd": "cat history.md",
+    "hist_hint": "every diagram is a real architecture. ↑ ↓ or click to switch, it dissolves into dust and the next one condenses.",
+    "hist_tab_portfolio": "portfolio",
+    "hist_tab_paper": "paper",
+    "hist_path": "~/history"
   },
   "journey": [
     {
@@ -145,7 +227,12 @@
       "visible": true,
       "cta_label": "",
       "cta_link": "",
-      "count": 1
+      "count": 1,
+      "themes": "all",
+      "show_in_nav": true,
+      "show_in_cv": true,
+      "nav_label": "",
+      "command": ""
     },
     {
       "id": "Numbers",
@@ -160,7 +247,12 @@
       "visible": true,
       "cta_label": "",
       "cta_link": "",
-      "count": 4
+      "count": 4,
+      "themes": "all",
+      "show_in_nav": true,
+      "show_in_cv": true,
+      "nav_label": "",
+      "command": ""
     },
     {
       "id": "Education",
@@ -175,7 +267,12 @@
       "visible": true,
       "cta_label": "",
       "cta_link": "",
-      "count": 3
+      "count": 3,
+      "themes": "all",
+      "show_in_nav": true,
+      "show_in_cv": true,
+      "nav_label": "",
+      "command": ""
     },
     {
       "id": "Skills",
@@ -190,7 +287,12 @@
       "visible": true,
       "cta_label": "",
       "cta_link": "",
-      "count": 23
+      "count": 23,
+      "themes": "all",
+      "show_in_nav": true,
+      "show_in_cv": true,
+      "nav_label": "",
+      "command": ""
     },
     {
       "id": "Experience",
@@ -205,7 +307,12 @@
       "visible": true,
       "cta_label": "",
       "cta_link": "",
-      "count": 1
+      "count": 1,
+      "themes": "all",
+      "show_in_nav": true,
+      "show_in_cv": true,
+      "nav_label": "",
+      "command": ""
     },
     {
       "id": "Projects",
@@ -220,7 +327,12 @@
       "visible": true,
       "cta_label": "More on GitHub",
       "cta_link": "https://github.com/Harsh4-Dev",
-      "count": 3
+      "count": 3,
+      "themes": "all",
+      "show_in_nav": true,
+      "show_in_cv": true,
+      "nav_label": "",
+      "command": ""
     },
     {
       "id": "Achievements",
@@ -235,7 +347,12 @@
       "visible": true,
       "cta_label": "",
       "cta_link": "",
-      "count": 2
+      "count": 2,
+      "themes": "all",
+      "show_in_nav": true,
+      "show_in_cv": true,
+      "nav_label": "",
+      "command": ""
     },
     {
       "id": "Certifications",
@@ -250,7 +367,12 @@
       "visible": true,
       "cta_label": "",
       "cta_link": "",
-      "count": 4
+      "count": 4,
+      "themes": "all",
+      "show_in_nav": true,
+      "show_in_cv": true,
+      "nav_label": "",
+      "command": ""
     },
     {
       "id": "Contact",
@@ -265,7 +387,12 @@
       "visible": true,
       "cta_label": "",
       "cta_link": "",
-      "count": 3
+      "count": 3,
+      "themes": "all",
+      "show_in_nav": true,
+      "show_in_cv": true,
+      "nav_label": "",
+      "command": ""
     }
   ],
   "data": {

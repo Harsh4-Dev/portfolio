@@ -1,16 +1,18 @@
 /*
- * app.js — renders content.json into the page and wires the 3D journey to scrolling.
+ * app.js — renders content.json into the page (paper theme) and wires the 3D journey to scrolling.
  * Layout renderers live in RENDERERS; add one there to support a new `layout` value.
+ * Every label comes from the Text sheet (T) and every part can be switched off in Settings (F).
  */
-import { loadContent, esc, slug, splitList, splitLinks, yes, dateRange, fmtDate, md, plain, themeColor, cycleColor, applyTheme, extraFields, img, hrefOf, initLiveReload, resolveTheme, switchTheme } from './content.js';
-import { doodle, isDoodle, guessIcon } from './doodles.js';
+import { loadContent, esc, slug, splitList, splitLinks, yes, dateRange, fmtDate, md, plain, themeColor, cycleColor, applyTheme, extraFields, img, hrefOf, initLiveReload, resolveTheme, switchTheme, makeText, flag, sectionsFor } from './content.js';
+import { doodle, guessIcon } from './doodles.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const el = (html) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; };
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
-let C, S, SECTIONS, JOURNEY, ERA_BY_ID, LINKS, scene = null, currentShape = null, currentMode = 'hero';
+let C, S, T, F, SECTIONS, JOURNEY, ERA_BY_ID, LINKS, scene = null, currentShape = null, currentMode = 'hero';
 
 // ---------------------------------------------------------------- small render helpers
 const iconOf = (v, cls = '', fallback = '') => doodle(v || fallback, cls) || (v ? `<span class="doodle doodle-emoji ${cls}">${esc(v)}</span>` : '');
@@ -21,7 +23,7 @@ const tagsHtml = (it, cls = 'chip') => {
 const linksHtml = (it, small = true) => {
   const out = [];
   const main = it.link || it.url;
-  if (main) out.push({ label: it.link_label || 'Open', url: main });
+  if (main) out.push({ label: it.link_label || T('paper_link_open', 'Open'), url: main });
   out.push(...splitLinks(it.links));
   if (!out.length) return '';
   return `<div class="links-row">${out.map((l) => `<a class="btn ${small ? 'btn-sm' : ''}" href="${esc(hrefOf(l.url))}" target="_blank" rel="noopener">${doodle(guessIcon(l.label, l.url))}${esc(l.label)}</a>`).join('')}</div>`;
@@ -32,6 +34,8 @@ const metaHtml = (it) => {
 };
 const imagesOf = (it) => [...splitList(it.image).slice(0, 1), ...String(it.images ?? '').split(';').map((s) => s.trim()).filter(Boolean)].map(img);
 const eraOf = (id) => ERA_BY_ID[String(id || '').toLowerCase()];
+const cvEnabled = () => F('show_cv_page');
+const isCvLink = (href) => /(^|\/)cv\.html$/i.test(String(href || ''));
 
 // ---------------------------------------------------------------- layout renderers
 const RENDERERS = {
@@ -76,19 +80,21 @@ const RENDERERS = {
 
   cards(sec, items) {
     const cols = Number(sec.columns) || 2;
+    const modal = F('paper_modal');
     return `<div class="cards" style="--cols:${cols}">${items.map((it, i) => {
       const image = imagesOf(it)[0];
       const color = themeColor(it.color, cycleColor(i));
-      return `<article class="card sketch ${i % 2 ? 'sketch-alt' : ''} ${yes(it.featured) ? 'featured' : ''} reveal draw" style="--i:${i}; --card-color:${color}" data-section="${esc(sec.id)}" data-index="${i}" tabindex="0" role="button" aria-haspopup="dialog">
+      return `<article class="card sketch ${i % 2 ? 'sketch-alt' : ''} ${yes(it.featured) ? 'featured' : ''} reveal draw ${modal ? '' : 'static'}" style="--i:${i}; --card-color:${color}" data-section="${esc(sec.id)}" data-index="${i}" ${modal ? 'tabindex="0" role="button" aria-haspopup="dialog"' : ''}>
         <div class="card-top">
           <div class="card-icon">${iconOf(it.icon, '', 'star')}</div>
           <div><h3 class="card-title">${esc(it.title)}</h3>${it.subtitle ? `<p class="card-sub">${esc(it.subtitle)}</p>` : ''}</div>
           ${it.status ? `<span class="card-status">${esc(it.status)}</span>` : ''}
         </div>
         ${image ? `<div class="card-img"><img src="${esc(image)}" alt="" loading="lazy"></div>` : ''}
-        <p class="card-desc">${esc(plain(it.description || it.summary, yes(it.featured) ? 260 : 170))}</p>
+        ${modal ? `<p class="card-desc">${esc(plain(it.description || it.summary, yes(it.featured) ? 260 : 170))}</p>` : `<div class="card-desc">${md(it.description || it.summary)}</div>`}
         ${tagsHtml(it, 'chip chip-soft')}
-        <div class="card-foot">${it.date || it.year ? `<span class="list-date">${esc(fmtDate(it.date || it.year))}</span>` : ''}<span class="more">read more ${doodle('arrow')}</span></div>
+        ${modal ? '' : linksHtml(it)}
+        <div class="card-foot">${it.date || it.year ? `<span class="list-date">${esc(fmtDate(it.date || it.year))}</span>` : ''}${modal ? `<span class="more">${esc(T('paper_card_more', 'read more'))} ${doodle('arrow')}</span>` : ''}</div>
       </article>`;
     }).join('')}</div>`;
   },
@@ -143,7 +149,7 @@ const RENDERERS = {
     return `<div class="contact">
       <div class="reveal draw">${doodle('mail', 'contact-doodle')}
         ${email ? `<a class="contact-big" href="mailto:${esc(email)}">${esc(email)}</a>` : ''}
-        ${S.location ? `<div class="hero-meta">${doodle('pin')} ${esc(S.location)}</div>` : ''}
+        ${S.location && F('show_location') ? `<div class="hero-meta">${doodle('pin')} ${esc(S.location)}</div>` : ''}
       </div>
       <div class="contact-links">${rows.map((r, i) => `<a class="contact-link sketch ${i % 2 ? 'sketch-alt' : ''} reveal" style="--i:${i}" href="${esc(hrefOf(r.url))}" ${String(r.url).startsWith('mailto:') ? '' : 'target="_blank" rel="noopener"'}>${iconOf(r.icon, '', guessIcon(r.label, r.url))}<div><b>${esc(r.label)}</b><span>${esc(r.sub || '')}</span></div></a>`).join('')}</div>
     </div>`;
@@ -152,16 +158,20 @@ const RENDERERS = {
 
 // ---------------------------------------------------------------- page pieces
 function renderNav() {
-  const cta = S.secondary_cta_label ? `<a class="btn btn-sm nav-cta" href="${esc(hrefOf(S.secondary_cta_link || 'cv.html'))}">${doodle('download')}${esc(S.secondary_cta_label)}</a>` : '';
-  const toggle = yes(S.theme_toggle ?? 'yes') ? `<button class="btn btn-sm nav-cta theme-toggle" id="theme-toggle" title="Switch to the terminal theme">${doodle('code')}Terminal</button>` : '';
-  $('#nav').innerHTML = `
-    <a class="logo" href="#top" aria-label="Back to top"><span class="logo-mark">${doodle('circle')}${esc(S.initials || (S.name || 'P').split(' ').map((w) => w[0]).join('').slice(0, 2))}</span><span class="logo-name">${esc(S.first_name || S.name || '')}</span></a>
-    <button class="burger" id="burger" aria-label="Menu" aria-expanded="false">${doodle('menu')}</button>
-    <nav class="nav-links" id="nav-links">${SECTIONS.map((s) => `<a href="#${esc(slug(s.id))}" data-for="${esc(slug(s.id))}">${esc(s.title)}</a>`).join('')}${cta}${toggle}</nav>`;
+  const nav = $('#nav');
+  if (!F('show_nav')) { nav.remove(); return; }
+  const ctaHref = hrefOf(S.secondary_cta_link || 'cv.html');
+  const cta = S.secondary_cta_label && !(isCvLink(ctaHref) && !cvEnabled()) ? `<a class="btn btn-sm nav-cta" href="${esc(ctaHref)}">${doodle('download')}${esc(S.secondary_cta_label)}</a>` : '';
+  const toggle = F('theme_toggle') ? `<button class="btn btn-sm nav-cta theme-toggle" id="theme-toggle" title="Switch to the terminal theme">${doodle('code')}${esc(T('paper_theme_toggle', 'Terminal'))}</button>` : '';
+  const links = SECTIONS.filter((s) => s.show_in_nav !== false);
+  nav.innerHTML = `
+    <a class="logo" href="#top" aria-label="${esc(T('paper_footer_top', 'Back to top'))}"><span class="logo-mark">${doodle('circle')}${esc(S.initials || (S.name || 'P').split(' ').map((w) => w[0]).join('').slice(0, 2))}</span><span class="logo-name">${esc(S.first_name || S.name || '')}</span></a>
+    <button class="burger" id="burger" aria-label="${esc(T('paper_menu', 'Menu'))}" aria-expanded="false">${doodle('menu')}</button>
+    <nav class="nav-links" id="nav-links">${links.map((s) => `<a href="#${esc(slug(s.id))}" data-for="${esc(slug(s.id))}">${esc(s.nav_label || s.title)}</a>`).join('')}${cta}${toggle}</nav>`;
   $('#theme-toggle')?.addEventListener('click', () => switchTheme('terminal'));
-  $('#burger').addEventListener('click', () => { const n = $('#nav'); n.classList.toggle('open'); $('#burger').setAttribute('aria-expanded', n.classList.contains('open')); });
-  $('#nav-links').addEventListener('click', (e) => { if (e.target.tagName === 'A') $('#nav').classList.remove('open'); });
-  addEventListener('scroll', () => $('#nav').classList.toggle('scrolled', scrollY > 30), { passive: true });
+  $('#burger').addEventListener('click', () => { nav.classList.toggle('open'); $('#burger').setAttribute('aria-expanded', nav.classList.contains('open')); });
+  $('#nav-links').addEventListener('click', (e) => { if (e.target.tagName === 'A') nav.classList.remove('open'); });
+  addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 30), { passive: true });
 }
 
 function heroEra() {
@@ -174,30 +184,31 @@ function renderHero() {
   const words = name.split(' ');
   const last = words.pop();
   const nameHtml = `${esc(words.join(' '))} <span class="underline-doodle">${esc(last)}${doodle('underline')}</span>`;
-  const roles = splitList(S.roles);
-  const era = heroEra();
-  const socials = LINKS.filter((l) => ['all', 'hero'].includes(l.show_in));
+  const roles = F('show_roles') ? splitList(S.roles) : [];
+  const era = F('show_era_note') ? heroEra() : null;
+  const socials = F('show_socials') ? LINKS.filter((l) => ['all', 'hero'].includes(l.show_in)) : [];
   const first = SECTIONS[0];
+  const cta2Href = hrefOf(S.secondary_cta_link || 'cv.html');
   return el(`<section class="hero" id="top">
     <div class="wrap hero-inner">
       <div class="hero-copy">
-        ${S.availability ? `<span class="pill"><i></i>${esc(S.availability)}</span>` : ''}
+        ${S.availability && F('show_availability') ? `<span class="pill"><i></i>${esc(S.availability)}</span>` : ''}
         ${S.tagline ? `<p class="hero-hello">${esc(S.tagline)}</p>` : ''}
         <h1>${nameHtml}</h1>
         ${roles.length ? `<p class="hero-roles"><span class="prefix">${esc(S.roles_prefix || 'I build')}</span> <span class="word" id="role-word">${esc(roles[0])}</span><span class="caret" aria-hidden="true"></span></p>` : ''}
         ${S.headline ? `<p class="hero-headline">${esc(S.headline)}</p>` : ''}
         <div class="hero-ctas">
           ${S.primary_cta_label ? `<a class="btn btn-primary" href="${esc(hrefOf(S.primary_cta_link || '#' + slug(first?.id || '')))}">${esc(S.primary_cta_label)} ${doodle('arrow')}</a>` : ''}
-          ${S.secondary_cta_label ? `<a class="btn" href="${esc(hrefOf(S.secondary_cta_link || 'cv.html'))}">${doodle('download')}${esc(S.secondary_cta_label)}</a>` : ''}
+          ${S.secondary_cta_label && !(isCvLink(cta2Href) && !cvEnabled()) ? `<a class="btn" href="${esc(cta2Href)}">${doodle('download')}${esc(S.secondary_cta_label)}</a>` : ''}
         </div>
         <div class="hero-meta">
           ${socials.length ? `<div class="socials">${socials.map((l) => `<a href="${esc(hrefOf(l.url))}" target="_blank" rel="noopener" aria-label="${esc(l.label)}" title="${esc(l.label)}">${doodle(l.icon || guessIcon(l.label, l.url))}</a>`).join('')}</div>` : ''}
-          ${S.location ? `<span>${doodle('pin')} ${esc(S.location)}</span>` : ''}
+          ${S.location && F('show_location') ? `<span>${doodle('pin')} ${esc(S.location)}</span>` : ''}
         </div>
       </div>
     </div>
-    ${era ? `<aside class="era-note" id="era-note">${doodle('arrow-curl', 'arrow')}<span class="year hand">${esc(era.year)}</span><strong>${esc(era.title)}</strong><p>${esc(era.insight)}</p>${S.hero_note ? `<p class="note">${esc(S.hero_note)}</p>` : ''}</aside>` : ''}
-    ${first ? `<a class="scroll-cue" href="#${esc(slug(first.id))}">${doodle('scroll')}<span>scroll</span></a>` : ''}
+    ${era ? `<aside class="era-note" id="era-note">${doodle('arrow-curl', 'arrow')}<span class="year hand">${esc(era.year)}</span><strong>${esc(era.title)}</strong><p>${esc(era.insight)}</p>${S.hero_note && F('show_hero_note') ? `<p class="note">${esc(S.hero_note)}</p>` : ''}</aside>` : ''}
+    ${first && F('show_scroll_cue') ? `<a class="scroll-cue" href="#${esc(slug(first.id))}">${doodle('scroll')}<span>${esc(T('paper_hero_scroll', 'scroll'))}</span></a>` : ''}
   </section>`);
 }
 
@@ -205,7 +216,7 @@ function renderSection(sec, i) {
   const items = C.data[sec.id] || [];
   const era = eraOf(sec.era);
   const render = RENDERERS[sec.layout] || RENDERERS.cards;
-  const body = items.length || sec.layout === 'text' ? render(sec, items) : `<p class="empty">Nothing here yet — add rows to the "${esc(sec.id)}" sheet.</p>`;
+  const body = items.length || sec.layout === 'text' ? render(sec, items) : `<p class="empty">${esc(T('paper_empty_section', "Nothing here yet — add rows to the '{id}' sheet.", { id: sec.id }))}</p>`;
   const decor = ['sparkle', 'star', 'plus', 'squiggle', 'wave'][i % 5];
   return el(`<section class="section layout-${esc(sec.layout)}" id="${esc(slug(sec.id))}" data-era="${esc(sec.era || '')}">
     <div class="wrap">
@@ -225,7 +236,7 @@ function renderSection(sec, i) {
 
 function renderRail() {
   const rail = $('#rail');
-  if (!yes(S.show_journey_rail ?? 'yes')) { rail.remove(); document.body.classList.remove('with-rail'); return; }
+  if (!F('show_journey_rail')) { rail.remove(); document.body.classList.remove('with-rail'); return; }
   const order = [];
   const hero = heroEra();
   if (hero) order.push(hero.id);
@@ -241,13 +252,15 @@ function renderRail() {
 }
 
 function renderFooter() {
-  const links = LINKS.filter((l) => ['all', 'footer'].includes(l.show_in));
   const f = $('#footer');
+  if (!F('show_footer')) { f.remove(); return; }
+  const links = LINKS.filter((l) => ['all', 'footer'].includes(l.show_in));
+  const vars = { year: new Date().getFullYear(), name: S.name || '', source: C.source || 'content.xlsx', date: (C.generated_at || '').slice(0, 10) };
   f.hidden = false;
   f.innerHTML = `<div class="wrap">
     <div><strong>${esc(S.name || '')}</strong>${S.footer_note ? `<p class="footer-note">${esc(S.footer_note)}</p>` : ''}</div>
-    <div class="footer-links">${links.map((l) => `<a href="${esc(hrefOf(l.url))}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join('')}<a href="cv.html">${doodle('print')} CV page</a><a href="#top">Back to top ↑</a></div>
-    <small>© ${new Date().getFullYear()} ${esc(S.name || '')}. Content generated from ${esc(C.source || 'content.xlsx')} on ${esc((C.generated_at || '').slice(0, 10))}.</small>
+    <div class="footer-links">${links.map((l) => `<a href="${esc(hrefOf(l.url))}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join('')}${cvEnabled() ? `<a href="cv.html">${doodle('print')} ${esc(T('paper_footer_cv', 'CV page'))}</a>` : ''}<a href="#top">${esc(T('paper_footer_top', 'Back to top ↑'))}</a></div>
+    <small>${esc(T('paper_footer_copyright', '© {year} {name}.', vars))}${F('show_generated_line') ? ' ' + esc(T('paper_footer_generated', 'Content generated from {source} on {date}.', vars)) : ''}</small>
   </div>`;
 }
 
@@ -268,8 +281,7 @@ function initCounters() {
     const t0 = performance.now(), dur = 1400;
     const tick = (now) => {
       const p = Math.min(1, (now - t0) / dur), ease = 1 - Math.pow(1 - p, 3);
-      const v = Math.round(intPart * ease);
-      e.target.textContent = `${pre}${v.toLocaleString()}${p === 1 ? dec : ''}${post}`;
+      e.target.textContent = `${pre}${Math.round(intPart * ease).toLocaleString()}${p === 1 ? dec : ''}${post}`;
       if (p < 1) requestAnimationFrame(tick); else e.target.textContent = raw;
     };
     requestAnimationFrame(tick);
@@ -293,7 +305,6 @@ function initRoles() {
   };
   setTimeout(type, 1800);
 }
-const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function initTilt() {
   if (reduced || matchMedia('(hover: none)').matches) return;
@@ -310,6 +321,7 @@ function initTilt() {
 function initModal() {
   const modal = $('#modal'), content = $('#modal-content');
   $('#modal-close').innerHTML = doodle('close');
+  $('#modal-close').setAttribute('aria-label', T('paper_modal_close', 'Close'));
   const open = (html) => { content.innerHTML = html; modal.hidden = false; document.body.classList.add('modal-open'); $('#modal-close').focus(); };
   const close = () => { modal.hidden = true; document.body.classList.remove('modal-open'); };
   $('#modal-close').addEventListener('click', close);
@@ -329,10 +341,12 @@ function initModal() {
       <div class="modal-foot">${linksHtml(it, false)}</div>`);
     scene?.burst(30);
   };
-  $$('.card').forEach((card) => {
-    card.addEventListener('click', (e) => { if (!e.target.closest('a')) openItem(card); });
-    card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openItem(card); } });
-  });
+  if (F('paper_modal')) {
+    $$('.card').forEach((card) => {
+      card.addEventListener('click', (e) => { if (!e.target.closest('a')) openItem(card); });
+      card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openItem(card); } });
+    });
+  }
   $$('.gallery figure').forEach((fig) => fig.addEventListener('click', () => open(`<div class="modal-img-only"><img src="${esc(fig.dataset.src)}" alt="${esc(fig.dataset.caption)}"></div>${fig.dataset.caption ? `<p class="hand" style="text-align:center;font-size:1.3rem;margin:.8rem 0 0">${esc(fig.dataset.caption)}</p>` : ''}`)));
 }
 
@@ -397,6 +411,8 @@ function showError(err) {
 async function main() {
   try { C = await loadContent(); } catch (e) { showError(e); return; }
   S = C.settings || {};
+  T = makeText(C);
+  F = (key, def = 'yes') => flag(S, key, def);
   if (resolveTheme(S) === 'terminal') {
     const mod = await import('./terminal.js');
     mod.bootTerminal(C);
@@ -406,11 +422,13 @@ async function main() {
   JOURNEY = C.journey || [];
   ERA_BY_ID = Object.fromEntries(JOURNEY.map((j) => [j.id, j]));
   LINKS = C.links || [];
-  SECTIONS = (C.sections || []).filter((s) => s.visible !== false);
+  SECTIONS = sectionsFor(C, 'paper');
   applyTheme(S);
   document.title = S.site_title || S.name || 'Portfolio';
   $('meta[name="description"]').content = S.seo_description || S.headline || '';
-  if (!yes(S.show_grain ?? 'yes')) document.body.classList.add('no-grain');
+  if (!F('show_grain')) document.body.classList.add('no-grain');
+  const skip = $('.skip'); if (skip) skip.textContent = T('paper_skip', 'Skip to content');
+  if (!F('show_scene', 'yes')) $('#scene')?.remove();
 
   renderNav();
   const main = $('#main');
@@ -422,7 +440,7 @@ async function main() {
   renderRail();
   renderFooter();
 
-  initScene();
+  if ($('#scene')) initScene();
   initReveal();
   initCounters();
   initRoles();

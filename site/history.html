@@ -16,14 +16,14 @@
 </head>
 <body class="theme-terminal">
   <header class="term-bar" id="term-bar">
-    <span class="title"><b id="ps">portfolio</b>:~/history</span>
-    <nav class="term-tabs"><a href="index.html?theme=terminal" data-text="portfolio">portfolio</a><a href="index.html?theme=paper" data-text="paper">paper</a></nav>
+    <span class="title"><b id="ps">portfolio</b><span id="hist-path">:~/history</span></span>
+    <nav class="term-tabs"><a href="index.html?theme=terminal" id="tab-portfolio">portfolio</a><a href="index.html?theme=paper" id="tab-paper">paper</a></nav>
   </header>
   <main class="hist" id="hist">
     <div>
-      <p class="line prompt"><span class="ps" id="ps2">portfolio</span><span class="cmd">cat history.md</span></p>
+      <p class="line prompt"><span class="ps" id="ps2">portfolio</span><span class="cmd" id="hist-cmd">cat history.md</span></p>
       <p class="line tag" id="hist-title">a short history of learning machines</p>
-      <p class="line dim" style="margin-bottom:var(--lh)">every diagram is a real architecture. ↑ ↓ or click to switch, it dissolves into dust and the next one condenses.</p>
+      <p class="line dim" id="hist-hint" style="margin-bottom:var(--lh)">every diagram is a real architecture. ↑ ↓ or click to switch, it dissolves into dust and the next one condenses.</p>
       <ol class="hist-list" id="hist-list"></ol>
     </div>
     <pre class="hist-screen" id="hist-screen" aria-hidden="true"></pre>

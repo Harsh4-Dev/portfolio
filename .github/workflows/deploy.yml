@@ -27,9 +27,9 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Build content.json from content.xlsx
+      - name: Build content.json from content.xlsx (and drop pages switched off in Settings)
         run: |
-          python tools/build_content.py
+          python tools/build_content.py --prune
           test -f site/content.json
 
       - uses: actions/configure-pages@v5

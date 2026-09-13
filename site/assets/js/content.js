@@ -173,6 +173,21 @@ export function initLiveReload() {
   poll();
 }
 
+/** UI text: T(key, fallback, {vars}) — Text sheet value if present, else the fallback; {placeholders} filled from vars. */
+export function makeText(content) {
+  const t = content.text || {};
+  return (key, fallback, vars = {}) => {
+    const raw = t[key] != null && t[key] !== '' ? String(t[key]) : String(fallback ?? '');
+    return raw.replace(/\{(\w+)\}/g, (m, k) => (vars[k] != null ? String(vars[k]) : m));
+  };
+}
+
+/** Settings switch: yes/no with a default when the row is missing or blank. */
+export const flag = (S, key, def = 'yes') => { const v = S?.[key]; return v == null || v === '' ? yes(def) : yes(v); };
+
+/** Sections visible in a given theme ('paper' | 'terminal'). */
+export const sectionsFor = (content, theme) => (content.sections || []).filter((s) => s.visible !== false && ['all', theme, ''].includes(String(s.themes || 'all').toLowerCase()));
+
 export const THEMES = ['paper', 'terminal'];
 
 /** Which theme to show: ?theme= in the URL, then the visitor's saved choice, then Settings.theme. */

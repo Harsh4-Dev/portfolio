@@ -2,10 +2,10 @@
  * terminal.js — the CLI theme. Same content.json, rendered as a terminal transcript on a
  * character grid: boot sequence, typed commands, ASCII banner / portrait, a rotating ASCII
  * wireframe, an animated character field behind the page, text-scramble hovers, single-key
- * shortcuts ([h] home [p] projects [c] contact [i] invert [/] prompt) and a working prompt.
- * The ML-history story lives on its own page: history.html.
+ * shortcuts and a working prompt. The ML-history story lives on its own page: history.html.
+ * Every label comes from the Text sheet (T) and every part can be switched off in Settings (F).
  */
-import { esc, slug, splitList, splitLinks, yes, dateRange, fmtDate, md, plain, extraFields, img, hrefOf, initLiveReload, switchTheme } from './content.js';
+import { esc, slug, splitList, splitLinks, yes, dateRange, fmtDate, md, plain, extraFields, img, hrefOf, initLiveReload, switchTheme, makeText, flag, sectionsFor } from './content.js';
 import { asciiText, resolveInto, measureCell } from './ascii.js';
 import { asciiImage, scramble, AsciiWire, WIRE_SHAPES, CharField } from './ascii-fx.js';
 
@@ -15,13 +15,15 @@ const el = (html) => { const t = document.createElement('template'); t.innerHTML
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
-let C, S, SECTIONS, LINKS, PS, field = null, wire = null;
+let C, S, T, F, SECTIONS, LINKS, PS, field = null, wire = null, typing = true;
 const fileName = (sec) => String(sec.id).toLowerCase().replace(/[^a-z0-9]+/g, '-');
+const cvEnabled = () => F('show_cv_page');
+const historyEnabled = () => F('show_history_page', S.terminal_history ?? 'yes') && (C.journey || []).length > 0;
 
 // ---------------------------------------------------------------- pieces
 const tagsLine = (it) => {
   const list = [...splitList(it.tags), ...splitList(it.tools), ...splitList(it.stack)];
-  return list.length ? `<p class="line tagsline">tags: ${list.map((t) => `<span>${esc(t)}</span>`).join('')}</p>` : '';
+  return list.length ? `<p class="line tagsline">${esc(T('term_tags', 'tags:'))} ${list.map((t) => `<span>${esc(t)}</span>`).join('')}</p>` : '';
 };
 const linksLine = (it) => {
   const out = [];
@@ -34,14 +36,10 @@ const metaLine = (it) => {
   return ex.length ? `<p class="line meta">${ex.map((f) => `<b>${esc(f.label.toLowerCase())}=</b>${esc(f.value)}`).join('  ')}</p>` : '';
 };
 const imagesOf = (it) => [...splitList(it.image).slice(0, 1), ...String(it.images ?? '').split(';').map((s) => s.trim()).filter(Boolean)].map(img);
-const prompt = (cmd, typed = true) => `<p class="line prompt"><span class="ps">${esc(PS)}</span><span class="cmd" ${typed ? `data-cmd="${esc(cmd)}"` : ''}>${typed ? '' : esc(cmd)}</span></p>`;
-const rule = () => `<p class="line rule">${'─'.repeat(120)}</p>`;
+const prompt = (cmd, typed = true) => `<p class="line prompt"><span class="ps">${esc(PS)}</span><span class="cmd" ${typed && typing ? `data-cmd="${esc(cmd)}"` : ''}>${typed && typing ? '' : esc(cmd)}</span></p>`;
 
-const COMMANDS = {
-  text: (s) => `cat ${fileName(s)}.md`, stats: (s) => `./${fileName(s)} --summary`, timeline: (s) => `cat ${fileName(s)}.log`,
-  cards: (s) => `ls -la ${fileName(s)}/`, tags: (s) => `tree ${fileName(s)}/`, list: (s) => `cat ${fileName(s)}.txt`,
-  gallery: (s) => `ls ${fileName(s)}/*.png`, table: (s) => `column -t ${fileName(s)}.tsv`, contact: () => 'cat contact.txt',
-};
+const DEFAULT_CMDS = { text: 'cat {id}.md', stats: './{id} --summary', timeline: 'cat {id}.log', cards: 'ls -la {id}/', tags: 'tree {id}/', list: 'cat {id}.txt', gallery: 'ls {id}/*.png', table: 'column -t {id}.tsv', contact: 'cat contact.txt' };
+const commandFor = (sec) => sec.command || T(`term_cmd_${sec.layout}`, DEFAULT_CMDS[sec.layout] || DEFAULT_CMDS.cards, { id: fileName(sec) });
 
 const RENDERERS = {
   text(sec, items) {
@@ -62,9 +60,9 @@ const RENDERERS = {
       const name = String(it.title || `item-${i + 1}`).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       const imgs = imagesOf(it);
       return `<span class="when">${esc(fmtDate(it.date || it.year) || String(dateRange(it) || '').split(' ')[0] || '')}</span><span class="name" data-section="${esc(sec.id)}" data-index="${i}" data-text="${esc(name)}/" role="button" tabindex="0">${esc(name)}/</span><span class="desc">${esc(it.subtitle || plain(it.description, 90))}</span><span class="st">${it.status ? `${esc(String(it.status).toLowerCase())}` : ''}</span>
-      <div class="detail" hidden id="detail-${esc(slug(sec.id))}-${i}">${prompt(`cat ${name}/README.md`, false)}<p class="line h">${esc(it.title)}</p>${it.subtitle ? `<p class="line dim">${esc(it.subtitle)}</p>` : ''}${imgs.length ? `<div class="gal">${imgs.map((s) => `<figure><img src="${esc(s)}" alt=""></figure>`).join('')}</div>` : ''}${md(it.description || it.summary)}${tagsLine(it)}${linksLine(it)}${metaLine(it)}</div>`;
+      <div class="detail" hidden id="detail-${esc(slug(sec.id))}-${i}">${prompt(T('term_readme', 'cat {name}/README.md', { name }), false)}<p class="line h">${esc(it.title)}</p>${it.subtitle ? `<p class="line dim">${esc(it.subtitle)}</p>` : ''}${imgs.length ? `<div class="gal">${imgs.map((s) => `<figure><img src="${esc(s)}" alt=""></figure>`).join('')}</div>` : ''}${md(it.description || it.summary)}${tagsLine(it)}${linksLine(it)}${metaLine(it)}</div>`;
     });
-    return `<p class="line dim">total ${items.length}</p><div class="ls">${rows.join('')}</div>`;
+    return `<p class="line dim">${esc(T('term_total', 'total {n}', { n: items.length }))}</p><div class="ls">${rows.join('')}</div>`;
   },
   tags(sec, items) {
     const groups = new Map();
@@ -101,37 +99,46 @@ const RENDERERS = {
   contact(sec, items) {
     const extra = LINKS.filter((l) => ['all', 'contact'].includes(l.show_in) && !items.some((it) => hrefOf(it.link) === l.url));
     const rows = [...items.map((it) => ({ k: it.title || it.label, v: it.subtitle || it.link, url: it.link || it.url })), ...extra.map((l) => ({ k: l.label, v: l.url.replace(/^(https?:\/\/|mailto:)/, ''), url: l.url }))];
-    if (S.location) rows.push({ k: 'location', v: S.location });
+    if (S.location && F('show_location')) rows.push({ k: 'location', v: S.location });
     return `<div class="kv">${rows.map((r) => `<span class="k">${esc(String(r.k).toLowerCase())}</span><span>${r.url ? `<a href="${esc(hrefOf(r.url))}" ${String(r.url).startsWith('mailto:') ? '' : 'target="_blank" rel="noopener"'}>${esc(r.v)}</a>` : esc(r.v)}</span>`).join('')}</div>`;
   },
 };
 
 // ---------------------------------------------------------------- page
-const showHistory = () => yes(S.terminal_history ?? 'yes') && (C.journey || []).length > 0;
-
 function renderBar() {
+  const tabs = SECTIONS.filter((s) => s.show_in_nav !== false).map((s) => { const label = (s.nav_label || fileName(s)).toLowerCase(); return `<a href="#${esc(slug(s.id))}" data-for="${esc(slug(s.id))}" data-text="${esc(label)}">${esc(label)}</a>`; });
+  if (historyEnabled()) tabs.push(`<a href="history.html" data-text="${esc(T('term_tab_history', 'history'))}">${esc(T('term_tab_history', 'history'))}</a>`);
+  if (cvEnabled()) tabs.push(`<a href="cv.html" data-text="${esc(T('term_tab_cv', 'cv'))}">${esc(T('term_tab_cv', 'cv'))}</a>`);
+  if (F('theme_toggle')) tabs.push(`<button id="theme-toggle" data-text="${esc(T('term_tab_paper', 'paper'))}" title="Switch to the paper theme">${esc(T('term_tab_paper', 'paper'))}</button>`);
   return el(`<header class="term-bar" id="term-bar">
-    <span class="title"><b>${esc(PS)}</b>:~/portfolio</span>
-    <button class="term-menu" id="term-menu" aria-label="Menu">menu</button>
-    <nav class="term-tabs" id="term-tabs">${SECTIONS.map((s) => `<a href="#${esc(slug(s.id))}" data-for="${esc(slug(s.id))}" data-text="${esc(fileName(s))}">${esc(fileName(s))}</a>`).join('')}${showHistory() ? '<a href="history.html" data-text="history">history</a>' : ''}<a href="cv.html" data-text="cv">cv</a>${yes(S.theme_toggle ?? 'yes') ? '<button id="theme-toggle" data-text="paper" title="Switch to the paper theme">paper</button>' : ''}</nav>
+    <span class="title">${esc(T('term_title', '{user}:~/portfolio', { user: PS })).replace(esc(PS), `<b>${esc(PS)}</b>`)}</span>
+    <button class="term-menu" id="term-menu" aria-label="Menu">${esc(T('term_menu', 'menu'))}</button>
+    <nav class="term-tabs" id="term-tabs">${tabs.join('')}</nav>
   </header>`);
 }
 
 function renderHero() {
-  const roles = splitList(S.roles);
-  const socials = LINKS.filter((l) => ['all', 'hero'].includes(l.show_in));
+  const roles = F('show_roles') ? splitList(S.roles) : [];
+  const socials = F('show_socials') ? LINKS.filter((l) => ['all', 'hero'].includes(l.show_in)) : [];
+  const banner = String(S.terminal_banner || 'ascii').toLowerCase();
+  const links = [
+    ...socials.map((l) => `<a href="${esc(hrefOf(l.url))}" target="_blank" rel="noopener" data-text="${esc(l.label.toLowerCase())}">${esc(l.label.toLowerCase())}</a>`),
+    S.resume_url ? `<a href="${esc(hrefOf(S.resume_url))}" target="_blank" rel="noopener" data-text="${esc(T('term_resume', 'resume.pdf'))}">${esc(T('term_resume', 'resume.pdf'))}</a>` : '',
+    cvEnabled() ? `<a href="cv.html" data-text="${esc(T('term_cv_link', 'cv'))}">${esc(T('term_cv_link', 'cv'))}</a>` : '',
+  ].filter(Boolean);
+  const meta = [S.tagline, F('show_location') ? S.location : ''].filter(Boolean).join(' · ');
   return el(`<section class="term-hero" id="top">
     <div class="copy">
-      ${prompt('whoami', false)}
-      <pre class="banner" id="banner" aria-label="${esc(S.name || '')}"></pre>
+      ${prompt(T('term_whoami', 'whoami'), false)}
+      ${banner === 'none' ? '' : banner === 'text' ? `<p class="banner-fallback">${esc(S.name || '')}</p>` : `<pre class="banner" id="banner" aria-label="${esc(S.name || '')}"></pre>`}
       <div class="hero-lines">
-        <p class="line dim">${esc([S.tagline, S.location].filter(Boolean).join(' · '))}</p>
-        ${S.availability ? `<p class="line"><span class="acc">*</span> ${esc(S.availability.toLowerCase())}</p>` : ''}
+        ${meta ? `<p class="line dim">${esc(meta)}</p>` : ''}
+        ${S.availability && F('show_availability') ? `<p class="line"><span class="acc">*</span> ${esc(S.availability.toLowerCase())}</p>` : ''}
         ${roles.length ? `<p class="line">&gt; ${esc(S.roles_prefix || 'I build')} <span class="role" id="role-word">${esc(roles[0])}</span><span class="caret" aria-hidden="true"></span></p>` : ''}
         ${S.headline ? `<p class="line headline">${esc(S.headline)}</p>` : ''}
-        <p class="line links-line">${socials.map((l) => `<a href="${esc(hrefOf(l.url))}" target="_blank" rel="noopener" data-text="${esc(l.label.toLowerCase())}">${esc(l.label.toLowerCase())}</a>`).join('')}${S.resume_url ? `<a href="${esc(hrefOf(S.resume_url))}" target="_blank" rel="noopener" data-text="resume.pdf">resume.pdf</a>` : ''}<a href="cv.html" data-text="cv">cv</a></p>
-        ${S.hero_note_terminal ? `<p class="line dim">${esc(S.hero_note_terminal)}</p>` : ''}
-        <p class="line dim">▼ scroll · <span class="acc">?</span> for shortcuts · <span class="acc">/</span> to type a command</p>
+        ${links.length ? `<p class="line links-line">${links.join('')}</p>` : ''}
+        ${S.hero_note_terminal && F('show_hero_note') ? `<p class="line dim">${esc(S.hero_note_terminal)}</p>` : ''}
+        ${F('show_scroll_cue') ? `<p class="line dim">${esc(T('term_scroll_hint', '▼ scroll · ? for shortcuts · / to type a command'))}</p>` : ''}
       </div>
     </div>
   </section>`);
@@ -140,10 +147,10 @@ function renderHero() {
 function renderSection(sec, index) {
   const items = C.data[sec.id] || [];
   const render = RENDERERS[sec.layout] || RENDERERS.cards;
-  const cmd = (COMMANDS[sec.layout] || COMMANDS.cards)(sec);
-  const body = items.length || sec.layout === 'text' ? render(sec, items) : `<p class="line err">${esc(fileName(sec))}: no entries yet — add rows to the "${esc(sec.id)}" sheet</p>`;
+  const cmd = commandFor(sec);
+  const body = items.length || sec.layout === 'text' ? render(sec, items) : `<p class="line err">${esc(T('term_empty_section', "{id}: no entries yet — add rows to the '{sheet}' sheet", { id: fileName(sec), sheet: sec.id }))}</p>`;
   const node = el(`<section class="term-block" id="${esc(slug(sec.id))}" data-index="${index}">
-    <p class="line rule">${'─'.repeat(3)} <b>${String(index + 1).padStart(2, '0')}</b> ${'─'.repeat(160)}</p>
+    ${F('show_section_numbers') ? `<p class="line rule">${'─'.repeat(3)} <b>${String(index + 1).padStart(2, '0')}</b> ${'─'.repeat(160)}</p>` : ''}
     ${prompt(cmd)}
     <div class="out">
       <p class="line tag">${esc(sec.title.toLowerCase())}${sec.eyebrow ? ` <span class="dim">— ${esc(sec.eyebrow.toLowerCase())}</span>` : ''}</p>
@@ -157,28 +164,25 @@ function renderSection(sec, index) {
 }
 
 function renderCli() {
-  const keys = [['h', 'home'], ['p', 'projects'], ['c', 'contact'], ['i', 'invert'], ['/', 'prompt'], ['?', 'help']];
+  const keys = F('show_status_bar') ? T('term_keys', 'h:home; p:projects; c:contact; i:invert; /:prompt; ?:help').split(';').map((s) => s.trim()).filter(Boolean).map((s) => { const i = s.indexOf(':'); return i > 0 ? [s.slice(0, i).trim(), s.slice(i + 1).trim()] : [s, '']; }) : [];
+  const showPrompt = F('show_prompt');
   return el(`<footer class="cli"><div class="cli-inner">
     <div class="cli-out" id="cli-out"></div>
-    <div class="cli-row"><span class="ps">${esc(PS)}</span><input id="cli" type="text" autocomplete="off" spellcheck="false" placeholder="help" aria-label="Command prompt"></div>
-    <div class="status">${keys.map(([k, l], i) => `<span class="${i > 2 ? 'hide-sm' : ''}"><span class="k">${k}</span> ${l}</span>`).join('')}<span class="clock hide-sm" id="clock"></span></div>
+    ${showPrompt ? `<div class="cli-row"><span class="ps">${esc(PS)}</span><input id="cli" type="text" autocomplete="off" spellcheck="false" placeholder="${esc(T('term_prompt_placeholder', 'help'))}" aria-label="Command prompt"></div>` : ''}
+    ${F('show_status_bar') ? `<div class="status">${keys.map(([k, l], i) => `<span class="${i > 2 ? 'hide-sm' : ''}"><span class="k">${esc(k)}</span> ${esc(l)}</span>`).join('')}${F('show_clock') ? '<span class="clock hide-sm" id="clock"></span>' : ''}</div>` : ''}
   </div></footer>`);
 }
 
 // ---------------------------------------------------------------- behaviours
 async function boot() {
-  if (!yes(S.terminal_boot ?? 'yes') || reduced) return;
+  if (!F('terminal_boot') || reduced) return;
   let seen = false;
   try { seen = sessionStorage.getItem('booted') === '1'; } catch { /* ignore */ }
   if (seen) return;
   const items = Object.values(C.data || {}).reduce((n, v) => n + v.length, 0);
-  const lines = [
-    `<span class="dim">${esc(PS)}</span> $ ./portfolio --serve`,
-    `[ <span class="ok">ok</span> ] reading ${esc(C.source || 'content.xlsx')} ........ ${items} items`,
-    `[ <span class="ok">ok</span> ] mounting sections ........... ${SECTIONS.length}`,
-    `[ <span class="ok">ok</span> ] font grid ................... ${getComputedStyle(document.body).getPropertyValue('--lh').trim() || '20px'}`,
-    `[ <span class="ok">ok</span> ] warming up the wireframe`,
-  ];
+  const vars = { source: C.source || 'content.xlsx', items, sections: SECTIONS.length, grid: getComputedStyle(document.body).getPropertyValue('--lh').trim() || '20px' };
+  const lines = [`<span class="dim">${esc(PS)}</span> $ ${esc(T('term_boot_cmd', './portfolio --serve'))}`,
+    ...T('term_boot_lines', '[ ok ] reading {source} ........ {items} items | [ ok ] mounting sections ........... {sections} | [ ok ] font grid ................... {grid} | [ ok ] warming up the wireframe', vars).split('|').map((l) => esc(l.trim()).replace(/^\[ ok \]/, '[ <span class="ok">ok</span> ]'))];
   const box = el('<pre class="boot" id="boot"></pre>');
   document.body.appendChild(box);
   let skipped = false;
@@ -199,7 +203,7 @@ async function boot() {
 
 async function typeCommand(node) {
   const cmd = node.dataset.cmd || '';
-  if (reduced) { node.textContent = cmd; return; }
+  if (reduced || !typing) { node.textContent = cmd; return; }
   node.innerHTML = '<span class="caret"></span>';
   for (let i = 1; i <= cmd.length; i++) { node.innerHTML = `${esc(cmd.slice(0, i))}<span class="caret"></span>`; await wait(20 + Math.random() * 28); }
   await wait(160);
@@ -211,7 +215,7 @@ async function printBlock(block) {
   if (cmd) await typeCommand(cmd);
   block.classList.add('in');
   const lines = $$('.out > *', block);
-  if (reduced) lines.forEach((l) => l.classList.add('shown'));
+  if (reduced || !typing) lines.forEach((l) => l.classList.add('shown'));
   else {
     const caret = el('<span class="pcaret" aria-hidden="true"></span>');
     const step = Math.max(18, Math.min(70, 900 / Math.max(1, lines.length)));
@@ -228,7 +232,7 @@ function animateBars(block) {
   $$('.tree .bar', block).forEach((bar, i) => {
     const n = bar.textContent.length, off = bar.nextElementSibling;
     const total = n + (off?.textContent.length || 0);
-    if (reduced || !n) return;
+    if (reduced || !typing || !n) return;
     let k = 0;
     const tick = () => { k++; bar.textContent = '█'.repeat(k); if (off) off.textContent = '░'.repeat(total - k); if (k < n) setTimeout(tick, 45); };
     bar.textContent = ''; if (off) off.textContent = '░'.repeat(total);
@@ -239,7 +243,7 @@ function animateBars(block) {
 function animateCounts(block) {
   $$('.stat-line b', block).forEach((b) => {
     const raw = b.textContent, m = raw.match(/^([^\d]*)(\d[\d,]*)(\.\d+)?(.*)$/);
-    if (!m || reduced) return;
+    if (!m || reduced || !typing) return;
     const pre = m[1], target = parseInt(m[2].replace(/,/g, ''), 10), dec = m[3] || '', post = m[4], t0 = performance.now();
     b.classList.add('counting');
     const tick = (now) => {
@@ -270,7 +274,7 @@ function initActiveTabs() {
     const idx = isHero ? 0 : Number(e.target.dataset.index) + 1;
     wire?.setShape(WIRE_SHAPES[idx % WIRE_SHAPES.length]);
     const cap = $('#side-cap');
-    if (cap) cap.textContent = isHero ? `${PS} $ whoami` : `${PS} $ ${$('.cmd', e.target)?.dataset.cmd || $('.cmd', e.target)?.textContent || ''}`;
+    if (cap) cap.textContent = isHero ? `${PS} $ ${T('term_whoami', 'whoami')}` : `${PS} $ ${$('.cmd', e.target)?.dataset.cmd || $('.cmd', e.target)?.textContent || ''}`;
   }), { rootMargin: '-40% 0px -45% 0px', threshold: 0 });
   io.observe($('#top'));
   $$('.term-block').forEach((s) => io.observe(s));
@@ -278,6 +282,7 @@ function initActiveTabs() {
 
 async function initBanner() {
   const pre = $('#banner');
+  if (!pre) return;
   const name = S.name || 'portfolio';
   const cell = measureCell(pre);
   let cols = Math.floor(pre.clientWidth / cell.w);
@@ -287,7 +292,7 @@ async function initBanner() {
   let rows;
   try { rows = asciiText(text, cols, { font: '900 120px "Segoe UI", Arial, Helvetica, sans-serif' }); } catch { rows = []; }
   if (!rows.length || rows.length > 40) { pre.replaceWith(el(`<p class="banner-fallback">${esc(name)}</p>`)); return; }
-  await resolveInto(pre, rows, { duration: 1400 });
+  if (typing) await resolveInto(pre, rows, { duration: 1400 }); else pre.textContent = rows.join('\n');
 }
 
 async function initSide() {
@@ -297,7 +302,7 @@ async function initSide() {
     try {
       const rows = await asciiImage(img(S.avatar), 64, { ramp: ' .:-=+*#%@' });
       pre.classList.add('portrait');
-      await resolveInto(pre, rows, { duration: 1600 });
+      if (typing) await resolveInto(pre, rows, { duration: 1600 }); else pre.textContent = rows.join('\n');
       return;
     } catch { /* fall through to the wireframe */ }
   }
@@ -310,7 +315,7 @@ function initRoles() {
   const words = splitList(S.roles);
   if (!node || words.length < 2) return;
   let wi = 0;
-  if (reduced) { setInterval(() => { wi = (wi + 1) % words.length; node.textContent = words[wi]; }, 3000); return; }
+  if (reduced || !typing) { setInterval(() => { wi = (wi + 1) % words.length; node.textContent = words[wi]; }, 3000); return; }
   const type = async () => {
     const w = words[wi];
     for (let i = 1; i <= w.length; i++) { node.textContent = w.slice(0, i); await wait(35 + Math.random() * 40); }
@@ -339,7 +344,7 @@ function initCards() {
 }
 
 function initScramble() {
-  if (reduced) return;
+  if (reduced || !typing) return;
   $$('[data-text]').forEach((n) => n.addEventListener('pointerenter', () => scramble(n)));
 }
 
@@ -349,7 +354,7 @@ function initClock() {
   const t0 = Date.now();
   const tick = () => {
     const up = Math.floor((Date.now() - t0) / 1000);
-    c.textContent = `${new Date().toLocaleTimeString([], { hour12: false })} · up ${Math.floor(up / 60)}m${String(up % 60).padStart(2, '0')}s`;
+    c.textContent = `${new Date().toLocaleTimeString([], { hour12: false })} · ${T('term_uptime', 'up {m}m{s}s', { m: Math.floor(up / 60), s: String(up % 60).padStart(2, '0') })}`;
   };
   tick(); setInterval(tick, 1000);
 }
@@ -363,62 +368,64 @@ function invert() {
 function initCli() {
   const input = $('#cli'), out = $('#cli-out');
   const say = (text, cls = '') => {
+    if (!out) return;
     (Array.isArray(text) ? text : [text]).forEach((t) => out.appendChild(el(`<p class="line ${cls}">${t}</p>`)));
     while (out.children.length > 7) out.removeChild(out.firstChild);
   };
   const projects = SECTIONS.filter((s) => s.layout === 'cards').flatMap((s) => (C.data[s.id] || []).map((it, i) => ({ sec: s, it, i })));
   const norm = (v) => String(v).toLowerCase().replace(/[^a-z0-9]/g, '');
-  const findSection = (q) => SECTIONS.find((s) => [s.id, s.title, fileName(s)].some((v) => norm(v) === q)) || SECTIONS.find((s) => fileName(s).startsWith(q) || norm(s.id).startsWith(q));
+  const findSection = (q) => SECTIONS.find((s) => [s.id, s.title, fileName(s), s.nav_label].some((v) => v && norm(v) === q)) || SECTIONS.find((s) => fileName(s).startsWith(q) || norm(s.id).startsWith(q));
   const goto = (id) => document.getElementById(id)?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' });
   const gotoLayout = (layout) => { const s = SECTIONS.find((x) => x.layout === layout); if (s) goto(slug(s.id)); };
-  const help = () => say('<span class="acc">ls</span> · <span class="acc">cat &lt;section&gt;</span> · <span class="acc">open &lt;project|n&gt;</span> · <span class="acc">history</span> · <span class="acc">invert</span> · <span class="acc">theme paper</span> · <span class="acc">cv</span> · <span class="acc">email</span> · <span class="acc">top</span> · <span class="acc">clear</span>');
+  const help = () => say(esc(T('term_help', 'ls · cat <section> · open <project|n> · history · invert · theme paper · cv · email · top · clear')).replace(/(^|·\s*)([a-z]+)/g, '$1<span class="acc">$2</span>'));
   const run = (raw) => {
     const line = raw.trim();
     if (!line) return;
     say(`<span class="dim">${esc(PS)} $</span> ${esc(line)}`);
     const [cmd, ...rest] = line.split(/\s+/);
-    const arg = norm(rest.join(' '));
+    const argRaw = rest.join(' '), arg = norm(argRaw);
     switch (cmd.toLowerCase()) {
       case 'help': case '?': help(); break;
-      case 'ls': case 'dir': say(SECTIONS.map((s) => `<span class="acc">${esc(fileName(s))}/</span>`).join('  ') + (showHistory() ? '  <span class="acc">history/</span>' : '')); break;
+      case 'ls': case 'dir': say(SECTIONS.map((s) => `<span class="acc">${esc(fileName(s))}/</span>`).join('  ') + (historyEnabled() ? `  <span class="acc">${esc(T('term_tab_history', 'history'))}/</span>` : '')); break;
       case 'cat': case 'cd': case 'go': case 'goto': case 'show': {
-        if (arg === 'history') { location.href = 'history.html'; break; }
+        if (arg === 'history' && historyEnabled()) { location.href = 'history.html'; break; }
         const s = findSection(arg);
-        if (s) { goto(slug(s.id)); say(`→ ${esc(s.title)}`); } else say(`cat: ${esc(rest.join(' '))}: no such file or directory`, 'err');
+        if (s) { goto(slug(s.id)); say(esc(T('term_goto', '→ {title}', { title: s.title }))); } else say(esc(T('term_no_such_file', 'cat: {arg}: no such file or directory', { arg: argRaw })), 'err');
         break;
       }
       case 'open': case 'run': {
         const n = parseInt(arg, 10);
         const p = Number.isFinite(n) ? projects[n - 1] : projects.find(({ it }) => norm(it.title).includes(arg));
-        if (p) { goto(slug(p.sec.id)); const nameEl = $(`.ls .name[data-section="${CSS.escape(p.sec.id)}"][data-index="${p.i}"]`); if (nameEl) toggleDetail(nameEl, true); say(`opening ${esc(p.it.title)} …`); }
-        else say(`open: nothing matches "${esc(rest.join(' '))}" — projects: ${projects.map(({ it }, i) => `${i + 1}) ${esc(it.title)}`).join(', ')}`, 'err');
+        if (p) { goto(slug(p.sec.id)); const nameEl = $(`.ls .name[data-section="${CSS.escape(p.sec.id)}"][data-index="${p.i}"]`); if (nameEl) toggleDetail(nameEl, true); say(esc(T('term_opening', 'opening {title} …', { title: p.it.title }))); }
+        else say(esc(T('term_no_match', "open: nothing matches '{arg}' — projects: {list}", { arg: argRaw, list: projects.map(({ it }, i) => `${i + 1}) ${it.title}`).join(', ') })), 'err');
         break;
       }
-      case 'history': location.href = 'history.html'; break;
+      case 'history': if (historyEnabled()) location.href = 'history.html'; else say(esc(T('term_not_found', 'bash: {cmd}: command not found (try help)', { cmd })), 'err'); break;
       case 'invert': case 'i': invert(); break;
-      case 'theme': if (arg === 'paper' || arg === 'light') switchTheme('paper'); else say('usage: theme paper', 'dim'); break;
-      case 'cv': case 'resume': location.href = 'cv.html'; break;
+      case 'theme': if ((arg === 'paper' || arg === 'light') && F('theme_toggle')) switchTheme('paper'); else say('usage: theme paper', 'dim'); break;
+      case 'cv': case 'resume': if (cvEnabled()) location.href = 'cv.html'; else if (S.resume_url) location.href = hrefOf(S.resume_url); break;
       case 'email': case 'mail': case 'contact': if (S.email) location.href = `mailto:${S.email}`; else gotoLayout('contact'); break;
       case 'top': case 'home': goto('top'); break;
-      case 'clear': case 'cls': out.innerHTML = ''; break;
+      case 'clear': case 'cls': if (out) out.innerHTML = ''; break;
       case 'whoami': say(esc(S.name || '')); break;
       case 'date': say(esc(new Date().toString())); break;
       case 'pwd': say('/home/' + esc(String(PS).split('@')[0]) + '/portfolio'); break;
-      case 'sudo': say('nice try.', 'dim'); break;
-      case 'exit': case 'quit': say('there is no escape. try <span class="acc">theme paper</span>.', 'dim'); break;
+      case 'sudo': say(esc(T('term_sudo', 'nice try.')), 'dim'); break;
+      case 'exit': case 'quit': say(esc(T('term_exit', 'there is no escape. try theme paper.')), 'dim'); break;
       default: {
         const s = findSection(norm(cmd));
-        if (s) { goto(slug(s.id)); say(`→ ${esc(s.title)}`); } else say(`bash: ${esc(cmd)}: command not found (try <span class="acc">help</span>)`, 'err');
+        if (s) { goto(slug(s.id)); say(esc(T('term_goto', '→ {title}', { title: s.title }))); } else say(esc(T('term_not_found', 'bash: {cmd}: command not found (try help)', { cmd })), 'err');
       }
     }
   };
-  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { run(input.value); input.value = ''; } if (e.key === 'Escape') input.blur(); });
+  input?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { run(input.value); input.value = ''; } if (e.key === 'Escape') input.blur(); });
+  if (!F('show_shortcuts')) return;
   addEventListener('keydown', (e) => {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
-    const typing = document.activeElement === input || ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName);
-    if (typing) return;
+    const typingNow = document.activeElement === input || ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName);
+    if (typingNow) return;
     switch (e.key) {
-      case '/': e.preventDefault(); input.focus(); break;
+      case '/': if (input) { e.preventDefault(); input.focus(); } break;
       case '?': help(); break;
       case 'h': goto('top'); break;
       case 'p': gotoLayout('cards'); break;
@@ -430,7 +437,7 @@ function initCli() {
 }
 
 function initField() {
-  if (reduced) return;
+  if (reduced || !F('terminal_field')) return;
   const canvas = el('<canvas class="field" id="field" aria-hidden="true"></canvas>');
   document.body.insertBefore(canvas, document.body.firstChild);
   const cs = getComputedStyle(document.body);
@@ -466,8 +473,11 @@ export function loadCss(href) {
 // ---------------------------------------------------------------- boot
 export async function bootTerminal(content) {
   C = content; S = C.settings || {};
+  T = makeText(C);
+  F = (key, def = 'yes') => flag(S, key, def);
+  typing = F('terminal_typing');
   LINKS = C.links || [];
-  SECTIONS = (C.sections || []).filter((s) => s.visible !== false);
+  SECTIONS = sectionsFor(C, 'terminal');
   PS = S.terminal_user || `${(S.first_name || 'me').toLowerCase().replace(/\s+/g, '')}@portfolio`;
 
   document.body.className = 'theme-terminal';
@@ -481,19 +491,23 @@ export async function bootTerminal(content) {
   const main = $('#main');
   main.innerHTML = '';
   main.className = 'term-body';
-  document.body.insertBefore(renderBar(), main);
+  if (F('show_nav')) document.body.insertBefore(renderBar(), main);
   const col = el('<div class="term-col" id="term-col"></div>');
   main.appendChild(col);
   col.appendChild(renderHero());
   SECTIONS.forEach((s, i) => col.appendChild(renderSection(s, i)));
-  col.appendChild(el(`<p class="line dim">${esc(S.footer_note || '')} — generated from ${esc(C.source || 'content.xlsx')} · ${esc((C.generated_at || '').slice(0, 10))}</p>`));
-  main.appendChild(el(`<aside class="side" aria-hidden="true"><pre class="hero-side" id="hero-side"></pre><p class="line side-cap" id="side-cap">${esc(PS)} $ whoami</p></aside>`));
-  document.body.appendChild(renderCli());
-  if (yes(S.terminal_scanlines ?? 'yes')) document.body.appendChild(el('<div class="scanlines" aria-hidden="true"></div>'));
+  if (F('show_footer')) {
+    const vars = { note: S.footer_note || '', source: C.source || 'content.xlsx', date: (C.generated_at || '').slice(0, 10) };
+    const closing = F('show_generated_line') ? T('term_generated', '{note} — generated from {source} · {date}', vars) : (S.footer_note || '');
+    if (closing.trim()) col.appendChild(el(`<p class="line dim">${esc(closing.replace(/^\s*—\s*/, ''))}</p>`));
+  }
+  if (F('terminal_wireframe')) main.appendChild(el(`<aside class="side" aria-hidden="true"><pre class="hero-side" id="hero-side"></pre><p class="line side-cap" id="side-cap">${esc(PS)} $ ${esc(T('term_whoami', 'whoami'))}</p></aside>`));
+  if (F('show_prompt') || F('show_status_bar')) document.body.appendChild(renderCli());
+  if (F('terminal_scanlines')) document.body.appendChild(el('<div class="scanlines" aria-hidden="true"></div>'));
 
   $('#theme-toggle')?.addEventListener('click', () => switchTheme('paper'));
-  $('#term-menu')?.addEventListener('click', () => $('#term-bar').classList.toggle('open'));
-  $('#term-tabs')?.addEventListener('click', (e) => { if (e.target.tagName === 'A') $('#term-bar').classList.remove('open'); });
+  $('#term-menu')?.addEventListener('click', () => $('#term-bar')?.classList.toggle('open'));
+  $('#term-tabs')?.addEventListener('click', (e) => { if (e.target.tagName === 'A') $('#term-bar')?.classList.remove('open'); });
 
   initField();
   const booting = boot();

@@ -67,6 +67,8 @@ README_ROWS = [
     ["LAYOUTS (Sections sheet)", ", ".join(LAYOUTS)],
     ["ERAS / SHAPES (Journey sheet)", ", ".join(SHAPES) + "  - each era is a moment in ML history; the 3D network morphs into that architecture when its section scrolls into view."],
     ["", ""],
+    ["Text sheet", "Every word the site prints that is not your content (buttons, hints, prompt commands, help text). Change any value; delete a row to get the default back. {placeholders} are filled in by the site."],
+    ["Show / hide", "Settings rows starting with show_ / terminal_ / paper_ switch parts and pages on or off. Sections: themes (all/paper/terminal), show_in_nav, show_in_cv, nav_label, command. Pages switched off are not published."],
     ["After editing", "Save. If `python studio.py` is running, the preview reloads by itself. Click Publish in the studio (or just git push) and GitHub builds the site."],
 ]
 
@@ -124,42 +126,130 @@ SETTINGS = [
     ["terminal_font", "JetBrains Mono", "Any Google monospace font"],
 ]
 
-SECTIONS_HDR = ["id", "title", "eyebrow", "intro", "layout", "order", "era", "doodle", "columns", "visible", "cta_label", "cta_link"]
+SETTINGS_NEW = [
+    ["show_cv_page", "yes", "yes/no - publish cv.html and link to it"],
+    ["show_history_page", "yes", "yes/no - publish history.html (ML history, terminal theme) and link to it"],
+    ["show_nav", "yes", "yes/no - top navigation bar (both themes)"],
+    ["show_footer", "yes", "yes/no - footer (paper) / closing line (terminal)"],
+    ["show_scroll_cue", "yes", "yes/no - 'scroll' hint under the hero"],
+    ["show_era_note", "yes", "yes/no - the era card on the paper hero"],
+    ["show_hero_note", "yes", "yes/no - hero_note lines"],
+    ["show_roles", "yes", "yes/no - the rotating 'I build ...' line"],
+    ["show_socials", "yes", "yes/no - social icons/links in the hero"],
+    ["show_location", "yes", "yes/no - location in hero and contact"],
+    ["show_availability", "yes", "yes/no - the availability pill/line (also hidden when availability is blank)"],
+    ["show_generated_line", "yes", "yes/no - the small 'generated from content.xlsx' line"],
+    ["show_section_numbers", "yes", "yes/no - the '--- 01 ---' dividers in the terminal theme"],
+    ["show_status_bar", "yes", "yes/no - shortcut legend at the bottom of the terminal theme"],
+    ["show_clock", "yes", "yes/no - clock + uptime in the terminal status bar"],
+    ["show_prompt", "yes", "yes/no - the typeable command prompt in the terminal theme"],
+    ["show_shortcuts", "yes", "yes/no - single-key shortcuts h/p/c/i/?/ in the terminal theme"],
+    ["terminal_field", "yes", "yes/no - animated character field behind the terminal theme"],
+    ["terminal_wireframe", "yes", "yes/no - rotating ASCII wireframe / portrait on the right"],
+    ["terminal_banner", "ascii", "ascii / text / none - how the name is shown in the terminal hero"],
+    ["terminal_typing", "yes", "yes/no - typed commands and line-by-line printing"],
+    ["paper_modal", "yes", "yes/no - clicking a project card opens the detail modal (paper theme)"],
+]
+TEXT_ROWS = [
+    ["paper_hero_scroll", "scroll", "Label under the scroll cue"],
+    ["paper_card_more", "read more", "Link text on project cards"],
+    ["paper_link_open", "Open", "Default label for a row's main link"],
+    ["paper_footer_cv", "CV page", "Footer link to cv.html"],
+    ["paper_footer_top", "Back to top ↑", ""],
+    ["paper_footer_copyright", "© {year} {name}.", "Placeholders: {year} {name}"],
+    ["paper_footer_generated", "Content generated from {source} on {date}.", "Placeholders: {source} {date}"],
+    ["paper_empty_section", "Nothing here yet — add rows to the '{id}' sheet.", ""],
+    ["paper_theme_toggle", "Terminal", "Header button that switches to the terminal theme"],
+    ["paper_menu", "Menu", "Mobile menu button label (accessibility)"],
+    ["paper_skip", "Skip to content", ""],
+    ["paper_loading", "warming up the perceptron", "Shown while content.json loads"],
+    ["paper_modal_close", "Close", ""],
+    ["cv_back", "← Portfolio", "Button on cv.html"],
+    ["cv_print", "Print / Save as PDF", ""],
+    ["cv_tools", "Tools:", "Label before a row's tags on cv.html"],
+    ["cv_generated", "Generated from {source} · {date}", ""],
+    ["term_title", "{user}:~/portfolio", "Window title, top-left"],
+    ["term_menu", "menu", "Mobile menu button"],
+    ["term_tab_history", "history", "Tab label"],
+    ["term_tab_cv", "cv", "Tab label"],
+    ["term_tab_paper", "paper", "Theme switch tab label"],
+    ["term_whoami", "whoami", "Command shown above the name"],
+    ["term_scroll_hint", "▼ scroll · ? for shortcuts · / to type a command", ""],
+    ["term_resume", "resume.pdf", "Link label for resume_url"],
+    ["term_cv_link", "cv", "Link label for cv.html in the hero"],
+    ["term_boot_cmd", "./portfolio --serve", "First boot line"],
+    ["term_boot_lines", "[ ok ] reading {source} ........ {items} items | [ ok ] mounting sections ........... {sections} | [ ok ] font grid ................... {grid} | [ ok ] warming up the wireframe", "Boot lines separated by |. Placeholders: {source} {items} {sections} {grid}"],
+    ["term_total", "total {n}", "First line of a project listing"],
+    ["term_tags", "tags:", ""],
+    ["term_readme", "cat {name}/README.md", "Command shown when a project is expanded"],
+    ["term_cmd_text", "cat {id}.md", "Command for text sections ({id} = sheet name, lowercase)"],
+    ["term_cmd_stats", "./{id} --summary", ""],
+    ["term_cmd_timeline", "cat {id}.log", ""],
+    ["term_cmd_cards", "ls -la {id}/", ""],
+    ["term_cmd_tags", "tree {id}/", ""],
+    ["term_cmd_list", "cat {id}.txt", ""],
+    ["term_cmd_gallery", "ls {id}/*.png", ""],
+    ["term_cmd_table", "column -t {id}.tsv", ""],
+    ["term_cmd_contact", "cat contact.txt", ""],
+    ["term_prompt_placeholder", "help", ""],
+    ["term_keys", "h:home; p:projects; c:contact; i:invert; /:prompt; ?:help", "Status bar legend, key:label pairs separated by ;"],
+    ["term_help", "ls · cat <section> · open <project|n> · history · invert · theme paper · cv · email · top · clear", "Printed by help / ?"],
+    ["term_not_found", "bash: {cmd}: command not found (try help)", ""],
+    ["term_no_such_file", "cat: {arg}: no such file or directory", ""],
+    ["term_no_match", "open: nothing matches '{arg}' — projects: {list}", ""],
+    ["term_opening", "opening {title} …", ""],
+    ["term_goto", "→ {title}", ""],
+    ["term_sudo", "nice try.", ""],
+    ["term_exit", "there is no escape. try theme paper.", ""],
+    ["term_empty_section", "{id}: no entries yet — add rows to the '{sheet}' sheet", ""],
+    ["term_generated", "{note} — generated from {source} · {date}", "Closing line. Placeholders: {note} = footer_note"],
+    ["term_uptime", "up {m}m{s}s", ""],
+    ["hist_cmd", "cat history.md", "Command line at the top of history.html"],
+    ["hist_hint", "every diagram is a real architecture. ↑ ↓ or click to switch, it dissolves into dust and the next one condenses.", ""],
+    ["hist_tab_portfolio", "portfolio", ""],
+    ["hist_tab_paper", "paper", ""],
+    ["hist_path", "~/history", "Shown after the user name in the title"],
+]
+SETTINGS += SETTINGS_NEW
+TEXT_HDR = ["key", "value", "note"]
+TEXT = TEXT_ROWS
+
+SECTIONS_HDR = ["id", "title", "eyebrow", "intro", "layout", "order", "era", "doodle", "columns", "visible", "cta_label", "cta_link", "themes", "show_in_nav", "show_in_cv", "nav_label", "command"]
 SECTIONS = [
-    ["About", "About me", "Hello", "", "text", 1, "neuron", "wave", "", "yes", "", ""],
-    ["Numbers", "In numbers", "At a glance", "", "stats", 2, "neuron", "sparkle", "4", "yes", "", ""],
-    ["Education", "Education", "Where I learned to learn", "", "timeline", 3, "perceptron", "book", "", "yes", "", ""],
-    ["Skills", "Skills", "Toolbox", "Things I reach for most. Filled dots are how comfortable I am.", "tags", 4, "mlp", "chip", "", "yes", "", ""],
-    ["Experience", "Experience", "Out in the field", "", "timeline", 5, "cnn", "pin", "", "yes", "", ""],
-    ["Projects", "Projects", "Things I have built", "Click a card for the full story.", "cards", 6, "deep", "rocket", "2", "yes", "More on GitHub", "https://github.com/Harsh4-Dev"],
-    ["Achievements", "Achievements", "Small trophies", "", "list", 7, "transformer", "trophy", "", "yes", "", ""],
-    ["Certifications", "Certifications", "Paper trail", "", "list", 8, "transformer", "medal", "2", "yes", "", ""],
-    ["Contact", "Let's build something", "Say hello", "I reply to every email. If you are working on LLM infrastructure, applied ML in healthcare, or anything self-hosted, I would love to hear about it.", "contact", 9, "constellation", "mail", "", "yes", "", ""],
+    ["About", "About me", "Hello", "", "text", 1, "neuron", "wave", "", "yes", "", "", "all", "yes", "yes", "", ""],
+    ["Numbers", "In numbers", "At a glance", "", "stats", 2, "neuron", "sparkle", "4", "yes", "", "", "all", "yes", "yes", "", ""],
+    ["Education", "Education", "Where I learned to learn", "", "timeline", 3, "perceptron", "book", "", "yes", "", "", "all", "yes", "yes", "", ""],
+    ["Skills", "Skills", "Toolbox", "Things I reach for most. Filled dots are how comfortable I am.", "tags", 4, "mlp", "chip", "", "yes", "", "", "all", "yes", "yes", "", ""],
+    ["Experience", "Experience", "Out in the field", "", "timeline", 5, "cnn", "pin", "", "yes", "", "", "all", "yes", "yes", "", ""],
+    ["Projects", "Projects", "Things I have built", "Click a card for the full story.", "cards", 6, "deep", "rocket", "2", "yes", "More on GitHub", "https://github.com/Harsh4-Dev", "all", "yes", "yes", "", ""],
+    ["Achievements", "Achievements", "Small trophies", "", "list", 7, "transformer", "trophy", "", "yes", "", "", "all", "yes", "yes", "", ""],
+    ["Certifications", "Certifications", "Paper trail", "", "list", 8, "transformer", "medal", "2", "yes", "", "", "all", "yes", "yes", "", ""],
+    ["Contact", "Let's build something", "Say hello", "I reply to every email. If you are working on LLM infrastructure, applied ML in healthcare, or anything self-hosted, I would love to hear about it.", "contact", 9, "constellation", "mail", "", "yes", "", "", "all", "yes", "yes", "", ""],
 ]
 
-JOURNEY_HDR = ["id", "year", "title", "insight", "shape", "color", "order"]
+JOURNEY_HDR = ["id", "year", "title", "insight", "shape", "color", "order", "visible"]
 JOURNEY = [
     ["neuron", "1943", "The first artificial neuron",
      "Warren McCulloch and Walter Pitts show that a single threshold unit can compute logic. Every network on this page - and every model I have trained - is still built from that idea.",
-     "neuron", "accent", 1],
+     "neuron", "accent", 1, "yes"],
     ["perceptron", "1958", "Rosenblatt's Mark I Perceptron",
      "A room-sized machine with a 20x20 grid of photocells and motor-driven potentiometers for weights. It learned to tell shapes apart from examples - the first machine that was taught rather than programmed.",
-     "perceptron", "accent2", 2],
+     "perceptron", "accent2", 2, "yes"],
     ["mlp", "1986", "Backpropagation goes mainstream",
      "Rumelhart, Hinton and Williams show hidden layers can be trained by pushing errors backwards. Learning became a matter of gradients - which is still how every model I fine-tune improves.",
-     "mlp", "accent3", 3],
+     "mlp", "accent3", 3, "yes"],
     ["cnn", "1998", "LeNet-5 reads the cheques",
      "Yann LeCun's convolutional network shipped inside bank machines and at one point read a sizeable share of US cheques. The first neural net doing quiet, industrial-scale work in production.",
-     "cnn", "accent4", 4],
+     "cnn", "accent4", 4, "yes"],
     ["deep", "2012", "AlexNet and the GPU era",
      "Two GTX 580 cards, a network split in half across them, and the ImageNet error rate drops by a third. GPUs became the substrate of the field - and, later, of my own self-hosted stack.",
-     "deep", "accent", 5],
+     "deep", "accent", 5, "yes"],
     ["transformer", "2017", "Attention is all you need",
      "Vaswani et al. replace recurrence with attention: every token looks at every other token. The architecture behind the LLMs I fine-tune and serve today.",
-     "transformer", "accent3", 6],
+     "transformer", "accent3", 6, "yes"],
     ["constellation", "Now", "Your chapter",
      "Models are cheap to run and expensive to get right. The interesting work is the whole system: data, weights, serving, the people using it.",
-     "constellation", "accent2", 7],
+     "constellation", "accent2", 7, "yes"],
 ]
 
 LINKS_HDR = ["label", "url", "icon", "show_in", "order"]
@@ -339,6 +429,13 @@ def main():
     ln = add_sheet(wb, "Links", LINKS_HDR, LINKS, {"label": 14, "url": 48, "icon": 10, "show_in": 10, "order": 7})
     ln.sheet_properties.tabColor = "6B6FD6"
     add_validation(ln, LINKS_HDR, "show_in", SHOW_IN)
+
+    tx = add_sheet(wb, "Text", TEXT_HDR, TEXT, {"key": 26, "value": 90, "note": 60}, wrap=("value", "note"))
+    tx.sheet_properties.tabColor = "6B6FD6"
+    add_validation(sec, SECTIONS_HDR, "themes", ["all", "paper", "terminal"])
+    add_validation(sec, SECTIONS_HDR, "show_in_nav", YESNO)
+    add_validation(sec, SECTIONS_HDR, "show_in_cv", YESNO)
+    add_validation(jr, JOURNEY_HDR, "visible", YESNO)
 
     add_sheet(wb, "About", ABOUT_HDR, ABOUT, {"title": 22, "description": 100, "image": 16, "order": 7})
     add_sheet(wb, "Numbers", NUMBERS_HDR, NUMBERS, {"value": 10, "label": 44, "icon": 10, "order": 7})

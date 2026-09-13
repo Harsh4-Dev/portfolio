@@ -48,6 +48,17 @@ If the port is taken: `python studio.py --port 8080`. To skip opening the browse
 The dashboard's **Status** shows warnings from the builder (unknown layout, missing image, empty
 section). "all good" means the workbook is clean.
 
+### Every word and every part is yours to change
+
+- **Words**: the `Text` sheet holds every label the site prints (button text, hints, the terminal's
+  commands and help lines, footer). Edit the value column. Delete a row to fall back to the default.
+- **Parts**: rows starting with `show_`, `terminal_` and `paper_` in `Settings` switch parts on or
+  off (yes/no). Pages: `show_cv_page`, `show_history_page`.
+- **Sections**: `themes` decides in which theme a section appears, `show_in_nav` / `show_in_cv`
+  where it is listed, `nav_label` what the menu says, `command` what the terminal "types".
+
+The dashboard's **Will publish** line reflects your choices immediately.
+
 ## 4. Pick a theme
 
 `Settings.theme` decides which theme the site opens with — this is what GitHub Pages serves:

@@ -1,5 +1,5 @@
 /* history.js — the ML-history page for the terminal theme: eras on the left, the architecture drawn in ASCII on the right. */
-import { loadContent, esc } from './content.js';
+import { loadContent, esc, makeText, flag } from './content.js';
 import { AsciiDiagram } from './ascii-diagram.js';
 import { scramble } from './ascii-fx.js';
 
@@ -18,10 +18,17 @@ async function main() {
   link.rel = 'stylesheet';
   link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(font).replace(/%20/g, '+')}:wght@400;700&display=swap`;
   document.head.appendChild(link);
+  const T = makeText(C);
   const PS = S.terminal_user || 'portfolio';
   $('#ps').textContent = PS; $('#ps2').textContent = PS;
   document.title = `${S.journey_title || 'A short history of learning machines'} — ${S.name || ''}`;
   $('#hist-title').textContent = (S.journey_title || 'a short history of learning machines').toLowerCase();
+  $('#hist-path').textContent = ':' + T('hist_path', '~/history');
+  $('#hist-cmd').textContent = T('hist_cmd', 'cat history.md');
+  $('#hist-hint').textContent = T('hist_hint', 'every diagram is a real architecture. ↑ ↓ or click to switch, it dissolves into dust and the next one condenses.');
+  $('#tab-portfolio').textContent = T('hist_tab_portfolio', 'portfolio');
+  const tabPaper = $('#tab-paper');
+  if (flag(S, 'theme_toggle')) tabPaper.textContent = T('hist_tab_paper', 'paper'); else tabPaper.remove();
 
   const eras = C.journey || [];
   const list = $('#hist-list');
