@@ -331,6 +331,7 @@ export function createScene(canvas, opts = {}) {
   function layoutOffsets() {
     const aspect = Number.isFinite(camera.aspect) && camera.aspect > 0 ? camera.aspect : 1.6;
     const w = 2 * CAM_Z * Math.tan((FOV * Math.PI) / 360) * aspect;
+    if (mode === 'center') return { x: 0, y: 0, s: aspect < 0.95 ? 0.6 : 0.95, o: 1 };
     if (mode === 'hero') {
       if (aspect < 0.95) return { x: w * 0.08, y: 1.1, s: 0.48, o: 0.38 };
       if (aspect < 1.3) return { x: w * 0.18, y: 0.4, s: 0.66, o: 0.85 };

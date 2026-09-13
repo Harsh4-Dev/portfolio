@@ -31,10 +31,13 @@ async function main() {
   let scene = null;
   try {
     const { createScene } = await import('./scene.js');
-    const canvas = $('#scene');
-    canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;visibility:hidden;display:block';
+    const canvas = document.createElement('canvas');
+    canvas.className = 'hist-canvas';
+    canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;visibility:hidden;pointer-events:none';
+    document.body.appendChild(canvas);
     scene = createScene(canvas, { palette: { paper: '#000000', ink: '#ffffff', accent: '#ff8c3a' }, density: S.scene_density || 'medium', asideOpacity: 1, renderScale: 0.4, preserveDrawingBuffer: true });
-    scene.setMode('aside');
+    scene.setMode('center');
+    window.__scene = scene;
     AsciiScreen($('#hist-screen'), canvas, { fps: 24 }).start();
   } catch (err) { console.warn('scene unavailable', err); }
 
