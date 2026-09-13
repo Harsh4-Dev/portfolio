@@ -25,10 +25,13 @@ ml-portfolio/
 └── .github/workflows/deploy.yml   ← builds & deploys on every push
 ```
 
-Two themes share the same workbook: **paper** (cream, doodles, 3D diagrams) and **terminal** (a dark
-CLI transcript with typed commands, an ASCII banner, the diagrams rendered live as ASCII and a
-working prompt — try `help`). `Settings.theme` picks the one GitHub Pages serves; visitors can
-toggle. `SETUP.md` is the step-by-step walkthrough.
+Two themes share the same workbook: **paper** (cream, doodles, 3D diagrams with the ML-history
+rail) and **terminal** (black and white with one yellow: boot sequence, typed commands, ASCII banner
+or ASCII portrait, a rotating ASCII wireframe, an animated character field behind the page,
+text-scramble hovers, single-key shortcuts and a working prompt — try `help`). In the terminal theme
+the ML-history story lives on its own page, `history.html`, where the diagrams are rendered as ASCII.
+`Settings.theme` picks the theme GitHub Pages serves; visitors can toggle. `SETUP.md` is the
+step-by-step walkthrough.
 
 ## 1. Run it locally
 
@@ -101,13 +104,18 @@ Other knobs in `Settings`: `color_*` (cream / ink / four accents), `font_display
 | `theme` | `paper` or `terminal` — the theme the site opens with (and what GitHub Pages serves) |
 | `theme_toggle` | yes/no — show the switch in the header |
 | `terminal_user` | prompt text, e.g. `harsh@portfolio` |
-| `terminal_bg`, `terminal_fg`, `terminal_dim`, `terminal_accent`, `terminal_accent_2` | terminal colours |
+| `terminal_bg`, `terminal_fg`, `terminal_dim`, `terminal_accent` | terminal colours (black, white, grey, the one yellow) |
+| `terminal_history` | yes/no — link to `history.html` (ML history as ASCII diagrams) |
+| `terminal_boot` | yes/no — boot sequence on first load |
+| `hero_note_terminal` | optional extra line under the terminal hero |
 | `terminal_font` | any Google monospace font (default JetBrains Mono) |
 | `terminal_scanlines` | yes/no — CRT scanline overlay |
 
 A visitor's choice is remembered in their browser; `?theme=terminal` / `?theme=paper` in the URL
 forces one. The terminal prompt understands `help`, `ls`, `cat <section>`, `open <project>`,
-`theme paper`, `cv`, `email`, `top`, `clear`.
+`history`, `invert`, `theme paper`, `cv`, `email`, `top`, `clear`. Single keys when not typing:
+`h` home, `p` projects, `c` contact, `i` invert, `/` prompt, `?` help. If `Settings.avatar` is set the
+terminal hero shows it as an ASCII portrait; otherwise a rotating ASCII wireframe.
 
 ### Images
 

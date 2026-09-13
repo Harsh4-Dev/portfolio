@@ -55,7 +55,7 @@ section). "all good" means the workbook is clean.
 | `theme` | Look |
 |---|---|
 | `paper` | cream paper, ink doodles, 3D diagrams that dissolve into dust |
-| `terminal` | dark CLI: typed commands, ASCII banner, the same diagrams rendered live as ASCII, a working prompt |
+| `terminal` | black & white CLI with one yellow: boot sequence, typed commands, ASCII banner / portrait, animated character field, shortcuts, a working prompt. ML history on its own page (`history.html`) |
 
 Visitors can switch with the toggle in the header (disable with `theme_toggle` = no). While
 previewing you can also force one with `?theme=terminal` or `?theme=paper` in the URL. Terminal

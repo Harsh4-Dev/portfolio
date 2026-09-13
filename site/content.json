@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-13T10:45:58Z",
+  "generated_at": "2026-09-13T11:02:44Z",
   "source": "content.xlsx",
   "settings": {
     "site_title": "Harshavardhan S - AI Systems Engineer",
@@ -43,13 +43,15 @@
     "theme": "paper",
     "theme_toggle": "yes",
     "terminal_user": "harsh@portfolio",
-    "terminal_bg": "#0b0d10",
-    "terminal_fg": "#d9dee4",
-    "terminal_dim": "#6f7a86",
-    "terminal_accent": "#7dd3a0",
-    "terminal_accent_2": "#f2c86b",
+    "terminal_bg": "#000000",
+    "terminal_fg": "#ffffff",
+    "terminal_dim": "#8a8a8a",
+    "terminal_accent": "#f2c86b",
     "terminal_scanlines": "yes",
-    "terminal_font": "JetBrains Mono"
+    "terminal_font": "JetBrains Mono",
+    "terminal_history": "yes",
+    "terminal_boot": "yes",
+    "hero_note_terminal": ""
   },
   "journey": [
     {

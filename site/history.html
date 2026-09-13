@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>History of learning machines</title>
+  <meta name="theme-color" content="#000000">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/terminal.css">
+  <script type="importmap">
+    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+  </script>
+  <style>html { background: #000; }</style>
+</head>
+<body class="theme-terminal">
+  <canvas id="scene" aria-hidden="true"></canvas>
+  <header class="term-bar" id="term-bar">
+    <span class="title"><b id="ps">portfolio</b>:~/history</span>
+    <nav class="term-tabs"><a href="index.html?theme=terminal" data-text="portfolio">portfolio</a><a href="index.html?theme=paper" data-text="paper">paper</a></nav>
+  </header>
+  <main class="hist" id="hist">
+    <div>
+      <p class="line prompt"><span class="ps" id="ps2">portfolio</span><span class="cmd">cat history.md</span></p>
+      <p class="line tag" id="hist-title">a short history of learning machines</p>
+      <p class="line dim" style="margin-bottom:var(--lh)">every diagram is a real architecture. ↑ ↓ or click to switch, it dissolves into dust and the next one condenses.</p>
+      <ol class="hist-list" id="hist-list"></ol>
+    </div>
+    <pre class="hist-screen" id="hist-screen" aria-hidden="true"></pre>
+  </main>
+  <script type="module" src="assets/js/history.js"></script>
+</body>
+</html>
