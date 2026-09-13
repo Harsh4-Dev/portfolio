@@ -3,11 +3,12 @@
 A static portfolio / CV site for GitHub Pages. **All content lives in one Excel file**
 (`content.xlsx`); the page, the printable CV and the 3D scene adapt to whatever you put in it.
 
-The hero is a Three.js network drawn in a doodle style on cream paper. As you scroll through your
-CV it morphs into real architectures from ML history — McCulloch–Pitts neuron (1943), Rosenblatt's
-Mark I Perceptron (1958), a backprop MLP (1986), LeNet-5 (1998), AlexNet's two-GPU split (2012), the
-Transformer (2017) — and finally into your own constellation. Each era carries a one-line historical
-insight, editable in the workbook.
+The hero is a clean ink diagram drawn by Three.js on cream paper. As you scroll through your CV the
+diagram dissolves into dust that drifts away and the next architecture from ML history condenses out
+of dust and draws its connections in — McCulloch–Pitts neuron (1943), Rosenblatt's Mark I Perceptron
+(1958), a backprop MLP (1986), LeNet-5 (1998), AlexNet's two-GPU split (2012), the Transformer (2017)
+— and finally your own constellation. Each era carries a one-line historical insight, editable in the
+workbook. `Settings.scene_density` controls how much dust each node breaks into.
 
 ```
 ml-portfolio/
