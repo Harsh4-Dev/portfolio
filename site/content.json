@@ -1,0 +1,587 @@
+{
+  "generated_at": "2026-09-13T10:21:24Z",
+  "source": "content.xlsx",
+  "settings": {
+    "site_title": "Harshavardhan S - AI Systems Engineer",
+    "name": "Harshavardhan S",
+    "first_name": "Harsh",
+    "initials": "HS",
+    "tagline": "AI systems, end to end",
+    "headline": "I fine-tune, serve and ship machine-learning systems - from domain-specific code LLMs on vLLM to a self-hosted vision app real people use every day.",
+    "roles": "domain-specific LLMs; self-hosted AI apps; clinical-trial data pipelines; full-stack ML tooling",
+    "roles_prefix": "I build",
+    "availability": "Open to AI/ML internships & research roles",
+    "location": "Trichy, Tamil Nadu, India",
+    "email": "harsha.v27105@gmail.com",
+    "phone": "",
+    "avatar": "",
+    "resume_url": "assets/Harshavardhan-S-Resume.pdf",
+    "primary_cta_label": "See my work",
+    "primary_cta_link": "#Projects",
+    "secondary_cta_label": "Download CV",
+    "secondary_cta_link": "cv.html",
+    "hero_era": "perceptron",
+    "hero_note": "Every network on this page is a real architecture from ML history. Scroll - the story runs alongside mine.",
+    "journey_title": "A short history of learning machines",
+    "show_journey_rail": "yes",
+    "footer_note": "Drawn with cream, ink and gradient descent.",
+    "seo_description": "Portfolio of Harshavardhan S - AI systems engineer: LLM fine-tuning, vLLM serving, self-hosted ML apps, data analytics.",
+    "color_paper": "#f7efe1",
+    "color_paper_2": "#efe3cc",
+    "color_ink": "#2a2622",
+    "color_accent": "#e2674a",
+    "color_accent_2": "#e8b43a",
+    "color_accent_3": "#2f9e8f",
+    "color_accent_4": "#6b6fd6",
+    "font_display": "Fraunces",
+    "font_hand": "Caveat",
+    "font_body": "Nunito",
+    "scene_density": "medium",
+    "scene_opacity_sections": "0.55",
+    "show_grain": "yes",
+    "cv_title": "Curriculum Vitae"
+  },
+  "journey": [
+    {
+      "id": "neuron",
+      "year": "1943",
+      "title": "The first artificial neuron",
+      "insight": "Warren McCulloch and Walter Pitts show that a single threshold unit can compute logic. Every network on this page - and every model I have trained - is still built from that idea.",
+      "shape": "neuron",
+      "color": "accent"
+    },
+    {
+      "id": "perceptron",
+      "year": "1958",
+      "title": "Rosenblatt's Mark I Perceptron",
+      "insight": "A room-sized machine with a 20x20 grid of photocells and motor-driven potentiometers for weights. It learned to tell shapes apart from examples - the first machine that was taught rather than programmed.",
+      "shape": "perceptron",
+      "color": "accent2"
+    },
+    {
+      "id": "mlp",
+      "year": "1986",
+      "title": "Backpropagation goes mainstream",
+      "insight": "Rumelhart, Hinton and Williams show hidden layers can be trained by pushing errors backwards. Learning became a matter of gradients - which is still how every model I fine-tune improves.",
+      "shape": "mlp",
+      "color": "accent3"
+    },
+    {
+      "id": "cnn",
+      "year": "1998",
+      "title": "LeNet-5 reads the cheques",
+      "insight": "Yann LeCun's convolutional network shipped inside bank machines and at one point read a sizeable share of US cheques. The first neural net doing quiet, industrial-scale work in production.",
+      "shape": "cnn",
+      "color": "accent4"
+    },
+    {
+      "id": "deep",
+      "year": "2012",
+      "title": "AlexNet and the GPU era",
+      "insight": "Two GTX 580 cards, a network split in half across them, and the ImageNet error rate drops by a third. GPUs became the substrate of the field - and, later, of my own self-hosted stack.",
+      "shape": "deep",
+      "color": "accent"
+    },
+    {
+      "id": "transformer",
+      "year": "2017",
+      "title": "Attention is all you need",
+      "insight": "Vaswani et al. replace recurrence with attention: every token looks at every other token. The architecture behind the LLMs I fine-tune and serve today.",
+      "shape": "transformer",
+      "color": "accent3"
+    },
+    {
+      "id": "constellation",
+      "year": "Now",
+      "title": "Your chapter",
+      "insight": "Models are cheap to run and expensive to get right. The interesting work is the whole system: data, weights, serving, the people using it.",
+      "shape": "constellation",
+      "color": "accent2"
+    }
+  ],
+  "links": [
+    {
+      "label": "GitHub",
+      "url": "https://github.com/Harsh4-Dev",
+      "icon": "github",
+      "show_in": "all"
+    },
+    {
+      "label": "LinkedIn",
+      "url": "https://www.linkedin.com/in/harshav1729",
+      "icon": "linkedin",
+      "show_in": "all"
+    },
+    {
+      "label": "Email",
+      "url": "mailto:harsha.v27105@gmail.com",
+      "icon": "mail",
+      "show_in": "all"
+    }
+  ],
+  "sections": [
+    {
+      "id": "About",
+      "title": "About me",
+      "eyebrow": "Hello",
+      "intro": "",
+      "layout": "text",
+      "order": 1,
+      "era": "neuron",
+      "doodle": "wave",
+      "columns": "",
+      "visible": true,
+      "cta_label": "",
+      "cta_link": "",
+      "count": 1
+    },
+    {
+      "id": "Numbers",
+      "title": "In numbers",
+      "eyebrow": "At a glance",
+      "intro": "",
+      "layout": "stats",
+      "order": 2,
+      "era": "neuron",
+      "doodle": "sparkle",
+      "columns": "4",
+      "visible": true,
+      "cta_label": "",
+      "cta_link": "",
+      "count": 4
+    },
+    {
+      "id": "Education",
+      "title": "Education",
+      "eyebrow": "Where I learned to learn",
+      "intro": "",
+      "layout": "timeline",
+      "order": 3,
+      "era": "perceptron",
+      "doodle": "book",
+      "columns": "",
+      "visible": true,
+      "cta_label": "",
+      "cta_link": "",
+      "count": 3
+    },
+    {
+      "id": "Skills",
+      "title": "Skills",
+      "eyebrow": "Toolbox",
+      "intro": "Things I reach for most. Filled dots are how comfortable I am.",
+      "layout": "tags",
+      "order": 4,
+      "era": "mlp",
+      "doodle": "chip",
+      "columns": "",
+      "visible": true,
+      "cta_label": "",
+      "cta_link": "",
+      "count": 23
+    },
+    {
+      "id": "Experience",
+      "title": "Experience",
+      "eyebrow": "Out in the field",
+      "intro": "",
+      "layout": "timeline",
+      "order": 5,
+      "era": "cnn",
+      "doodle": "pin",
+      "columns": "",
+      "visible": true,
+      "cta_label": "",
+      "cta_link": "",
+      "count": 1
+    },
+    {
+      "id": "Projects",
+      "title": "Projects",
+      "eyebrow": "Things I have built",
+      "intro": "Click a card for the full story.",
+      "layout": "cards",
+      "order": 6,
+      "era": "deep",
+      "doodle": "rocket",
+      "columns": "2",
+      "visible": true,
+      "cta_label": "More on GitHub",
+      "cta_link": "https://github.com/Harsh4-Dev",
+      "count": 3
+    },
+    {
+      "id": "Achievements",
+      "title": "Achievements",
+      "eyebrow": "Small trophies",
+      "intro": "",
+      "layout": "list",
+      "order": 7,
+      "era": "transformer",
+      "doodle": "trophy",
+      "columns": "",
+      "visible": true,
+      "cta_label": "",
+      "cta_link": "",
+      "count": 2
+    },
+    {
+      "id": "Certifications",
+      "title": "Certifications",
+      "eyebrow": "Paper trail",
+      "intro": "",
+      "layout": "list",
+      "order": 8,
+      "era": "transformer",
+      "doodle": "medal",
+      "columns": "2",
+      "visible": true,
+      "cta_label": "",
+      "cta_link": "",
+      "count": 4
+    },
+    {
+      "id": "Contact",
+      "title": "Let's build something",
+      "eyebrow": "Say hello",
+      "intro": "I reply to every email. If you are working on LLM infrastructure, applied ML in healthcare, or anything self-hosted, I would love to hear about it.",
+      "layout": "contact",
+      "order": 9,
+      "era": "constellation",
+      "doodle": "mail",
+      "columns": "",
+      "visible": true,
+      "cta_label": "",
+      "cta_link": "",
+      "count": 3
+    }
+  ],
+  "data": {
+    "About": [
+      {
+        "title": "Hi, I'm Harsh.",
+        "description": "I'm a Computer Science undergraduate (AI & Data Science) at SASTRA and a Data Analytics intern at Roche, where I work with clinical-trial data.\n\nWhat I enjoy most is the full arc of an ML system: getting data into shape, fine-tuning a model with PEFT/DoRA, serving it fast on vLLM, and wrapping it in something people actually use. My nutrition tracker runs on a GPU box I administer myself and has 20+ daily users who never think about the model behind the camera.\n\nOutside of work I read ML history (hence this page), tinker with self-hosting, and keep a long list of things to rebuild from scratch just to understand them.",
+        "order": 1
+      }
+    ],
+    "Numbers": [
+      {
+        "value": "20+",
+        "label": "daily users on my self-hosted AI app",
+        "icon": "heart",
+        "order": 1
+      },
+      {
+        "value": "4",
+        "label": "LLM training paradigms used (FIM, CLM, SFT, DoRA)",
+        "icon": "brain",
+        "order": 2
+      },
+      {
+        "value": "Top 2%",
+        "label": "of 33,000+ in NPTEL Cloud Computing",
+        "icon": "trophy",
+        "order": 3
+      },
+      {
+        "value": "8.25",
+        "label": "CGPA, B.Tech CSE (AI & DS)",
+        "icon": "book",
+        "order": 4
+      }
+    ],
+    "Education": [
+      {
+        "title": "B.Tech - Computer Science & Engineering (AI & Data Science)",
+        "org": "SASTRA Deemed to be University",
+        "location": "Thanjavur, India",
+        "start": "2023",
+        "end": "2027",
+        "description": "CGPA 8.25. Specialisation in artificial intelligence and data science.",
+        "icon": "book",
+        "order": 1
+      },
+      {
+        "title": "Honors - Applied Accelerated Artificial Intelligence",
+        "org": "NPTEL - IIT Guwahati",
+        "start": "2025",
+        "description": "GPU compute and system software for accelerated-computing AI solutions, with end-to-end industrial deployment. Elite certification.",
+        "tags": "GPU, CUDA, deployment",
+        "icon": "chip",
+        "order": 2
+      },
+      {
+        "title": "Honors - Cloud Computing",
+        "org": "NPTEL - IIT Kharagpur",
+        "start": "2025",
+        "description": "Cloud architectures, virtualisation and service models. Top 2% of 33,000+ certified candidates (Elite - Topper, 90%).",
+        "tags": "cloud, virtualisation",
+        "icon": "globe",
+        "order": 3
+      }
+    ],
+    "Skills": [
+      {
+        "title": "Python",
+        "group": "Languages",
+        "level": 5,
+        "order": 1
+      },
+      {
+        "title": "PyTorch",
+        "group": "AI / ML",
+        "level": 4,
+        "order": 1
+      },
+      {
+        "title": "FastAPI",
+        "group": "Frameworks",
+        "level": 5,
+        "order": 1
+      },
+      {
+        "title": "Docker",
+        "group": "Infra & tools",
+        "level": 4,
+        "order": 1
+      },
+      {
+        "title": "SQL",
+        "group": "Languages",
+        "level": 4,
+        "order": 2
+      },
+      {
+        "title": "Hugging Face",
+        "group": "AI / ML",
+        "level": 5,
+        "order": 2
+      },
+      {
+        "title": "Django",
+        "group": "Frameworks",
+        "level": 3,
+        "order": 2
+      },
+      {
+        "title": "Linux",
+        "group": "Infra & tools",
+        "level": 5,
+        "order": 2
+      },
+      {
+        "title": "JavaScript",
+        "group": "Languages",
+        "level": 4,
+        "order": 3
+      },
+      {
+        "title": "PEFT / DoRA",
+        "group": "AI / ML",
+        "level": 4,
+        "order": 3
+      },
+      {
+        "title": "React",
+        "group": "Frameworks",
+        "level": 3,
+        "order": 3
+      },
+      {
+        "title": "nginx",
+        "group": "Infra & tools",
+        "level": 3,
+        "order": 3
+      },
+      {
+        "title": "TypeScript",
+        "group": "Languages",
+        "level": 3,
+        "order": 4
+      },
+      {
+        "title": "vLLM",
+        "group": "AI / ML",
+        "level": 4,
+        "order": 4
+      },
+      {
+        "title": "REST APIs",
+        "group": "Frameworks",
+        "level": 4,
+        "order": 4
+      },
+      {
+        "title": "Git",
+        "group": "Infra & tools",
+        "level": 4,
+        "order": 4
+      },
+      {
+        "title": "LangChain",
+        "group": "AI / ML",
+        "level": 3,
+        "order": 5
+      },
+      {
+        "title": "Cloudflare Tunnel",
+        "group": "Infra & tools",
+        "level": 3,
+        "order": 5
+      },
+      {
+        "title": "Computer Vision",
+        "group": "AI / ML",
+        "level": 3,
+        "order": 6
+      },
+      {
+        "title": "SQLite",
+        "group": "Infra & tools",
+        "level": 4,
+        "order": 6
+      },
+      {
+        "title": "pandas / NumPy",
+        "group": "AI / ML",
+        "level": 4,
+        "order": 7
+      },
+      {
+        "title": "NVIDIA DGX",
+        "group": "Infra & tools",
+        "level": 3,
+        "order": 7
+      },
+      {
+        "title": "RAG & document parsing",
+        "group": "AI / ML",
+        "level": 4,
+        "order": 8
+      }
+    ],
+    "Experience": [
+      {
+        "title": "Data Analytics Intern",
+        "org": "Roche",
+        "location": "Remote / India",
+        "start": "2026-06",
+        "end": "Present",
+        "description": "- Query, clean and analyse large clinical-trial datasets with SQL and Python (pandas, NumPy) to produce reliable, analysis-ready data.\n- Surface trends and anomalies through exploratory analysis and ML-assisted pattern detection to inform study-team decisions.\n- Automate recurring reporting and data-quality checks, improving consistency and turnaround for downstream stakeholders.",
+        "tags": "SQL, Python, pandas, NumPy, clinical trials",
+        "icon": "flask",
+        "order": 1
+      }
+    ],
+    "Projects": [
+      {
+        "title": "Domain-Specific Code LLM",
+        "subtitle": "Fine-tuned code model for a proprietary enterprise platform",
+        "description": "An end-to-end pipeline to build a code LLM for a proprietary enterprise development language.\n\n- Trained base models across four paradigms - fill-in-the-middle (FIM), causal LM, supervised fine-tuning and DoRA - and served them at high throughput with **vLLM** behind an OpenWebUI chat interface.\n- Rebuilt the platform's core from scratch: a functional re-implementation of its multi-value database engine (maker-checker approval lifecycle, write-ahead-log crash recovery) exposed through a REST API, used to synthesise and validate training data.\n- Built an autonomous full-stack coding agent that converts legacy code into the target language, expanding the training corpus and closing the fine-tuning loop.",
+        "tags": "Python, PyTorch, Hugging Face, PEFT/DoRA, vLLM, OpenWebUI, FastAPI, Linux",
+        "featured": "yes",
+        "icon": "brain",
+        "color": "accent",
+        "date": "2025 - 2026",
+        "status": "Private",
+        "order": 1
+      },
+      {
+        "title": "Harahachi",
+        "subtitle": "Self-hosted AI calorie & macro tracker - 20+ active users",
+        "description": "A photo-first nutrition tracker: a vision LLM identifies each food item on the plate and estimates calories and macros; you confirm with one tap.\n\n- **FastAPI edge-AI gateway** with QR device pairing, multi-user accounts with per-user isolation, a pluggable multi-LLM registry (vLLM / LM Studio / NVIDIA API) with automatic failover, push reminders and an admin dashboard.\n- Packaged as a single Docker container (nginx + FastAPI + outbound-only Cloudflare tunnel), deployed rootless on an NVIDIA DGX.\n- Shipped as an installable PWA and a Capacitor Android app, backed by a 150+ test suite.",
+        "tags": "Python, FastAPI, SQLite, Docker, nginx, Cloudflare Tunnel, JavaScript, Capacitor, NVIDIA NIM",
+        "link": "https://github.com/Harsh4-Dev/harahachi",
+        "link_label": "GitHub",
+        "featured": "yes",
+        "icon": "heart",
+        "color": "accent3",
+        "date": "2025 - now",
+        "status": "In production",
+        "order": 2
+      },
+      {
+        "title": "docparser",
+        "subtitle": "Any document to RAG-ready chunks, offline, on CPU",
+        "description": "Turns PDFs, scans, images, Office files and HTML into retrieval-ready chunks with tables, figures, fonts and colour metadata attached.\n\n- Per-page routing between native text extraction and OCR (RapidOCR + Tesseract consensus that re-inserts lost word boundaries), with the decision and its evidence recorded per page.\n- Four table detectors (ruled, borderless, pixel grids, format-native) normalised onto one representation, with cross-page merging and linearised rows so table content is embeddable.\n- Structure-driven chunking - never a sliding window - under a ~1 GB RAM ceiling.",
+        "tags": "Python, PyMuPDF, ONNX, RapidOCR, Tesseract, RAG",
+        "icon": "network",
+        "color": "accent4",
+        "date": "2026",
+        "status": "Active",
+        "order": 3
+      }
+    ],
+    "Achievements": [
+      {
+        "title": "Finalist - ANRF AISEHack 2026",
+        "subtitle": "Anusandhan National Research Foundation with IBM Research & IIT Delhi, held at IIIT Hyderabad",
+        "date": "2026",
+        "description": "Team Hackaholics.",
+        "icon": "trophy",
+        "order": 1
+      },
+      {
+        "title": "Elite - Topper, NPTEL Cloud Computing",
+        "subtitle": "Top 2% of 33,000+ certified candidates, score 90%",
+        "date": "2025",
+        "icon": "medal",
+        "order": 2
+      }
+    ],
+    "Certifications": [
+      {
+        "title": "Hugging Face LLM Course",
+        "subtitle": "Fundamentals of LLMs; Fine-tuning Language Models",
+        "date": "2025",
+        "link": "https://huggingface.co/learn",
+        "icon": "brain",
+        "order": 1
+      },
+      {
+        "title": "Applied Accelerated Artificial Intelligence",
+        "subtitle": "NPTEL - IIT Guwahati, Elite",
+        "date": "2025",
+        "icon": "chip",
+        "order": 2
+      },
+      {
+        "title": "Machine Learning & Deep Learning Onramp",
+        "subtitle": "MathWorks",
+        "date": "2024",
+        "icon": "graph",
+        "order": 3
+      },
+      {
+        "title": "Graph Theory Programming Camp & DSA Course",
+        "subtitle": "AlgoUniversity, mentored by a Codeforces Master",
+        "date": "2024",
+        "icon": "code",
+        "order": 4
+      }
+    ],
+    "Contact": [
+      {
+        "title": "Email",
+        "subtitle": "harsha.v27105@gmail.com",
+        "link": "mailto:harsha.v27105@gmail.com",
+        "icon": "mail",
+        "order": 1
+      },
+      {
+        "title": "GitHub",
+        "subtitle": "github.com/Harsh4-Dev",
+        "link": "https://github.com/Harsh4-Dev",
+        "icon": "github",
+        "order": 2
+      },
+      {
+        "title": "LinkedIn",
+        "subtitle": "linkedin.com/in/harshav1729",
+        "link": "https://www.linkedin.com/in/harshav1729",
+        "icon": "linkedin",
+        "order": 3
+      }
+    ]
+  }
+}

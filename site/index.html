@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Portfolio</title>
+  <meta name="description" content="">
+  <meta name="theme-color" content="#f7efe1">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%23f7efe1' stroke='%232a2622' stroke-width='6'/%3E%3Ccircle cx='50' cy='50' r='12' fill='%23e2674a'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script type="importmap">
+    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+  </script>
+</head>
+<body class="with-rail">
+  <canvas id="scene" aria-hidden="true"></canvas>
+  <div class="grain" aria-hidden="true"></div>
+  <a class="skip" href="#content">Skip to content</a>
+
+  <header class="nav" id="nav"></header>
+
+  <main id="main">
+    <div class="loading" id="loading">
+      <div>warming up the perceptron <span class="dots"><svg class="doodle" viewBox="0 0 100 30" fill="none" stroke="currentColor" stroke-width="3"><path d="M16 15 m-5 0 a5 5 0 1 0 10 0 a5 5 0 1 0 -10 0"/><path d="M50 15 m-5 0 a5 5 0 1 0 10 0 a5 5 0 1 0 -10 0" style="animation-delay:.2s"/><path d="M84 15 m-5 0 a5 5 0 1 0 10 0 a5 5 0 1 0 -10 0" style="animation-delay:.4s"/></svg></span></div>
+    </div>
+  </main>
+
+  <aside class="rail" id="rail" aria-label="A short history of learning machines"></aside>
+
+  <footer class="footer" id="footer" hidden></footer>
+
+  <div class="modal" id="modal" hidden role="dialog" aria-modal="true">
+    <div class="modal-card sketch">
+      <button class="modal-close" id="modal-close" aria-label="Close"></button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <script type="module" src="assets/js/app.js"></script>
+</body>
+</html>
