@@ -142,7 +142,9 @@ alone is enough; the workflow regenerates the JSON.
 - Layout renderers are small functions in `site/assets/js/app.js` (`RENDERERS`) for the paper theme
   and `site/assets/js/terminal.js` for the terminal theme. Add one in each, and the new `layout`
   value is available in the `Sections` sheet.
-- The ASCII conversion (banner from a real font, live WebGL→characters) is `site/assets/js/ascii.js`.
+- The architecture layouts are `site/assets/js/layouts.js` (shared by the 3D scene and the ASCII
+  diagram renderer `ascii-diagram.js` used on `history.html`). ASCII banner/portrait, text scramble,
+  the rotating wireframes and the character field are in `ascii.js` / `ascii-fx.js`.
 - Architectures for the scene are in `site/assets/js/scene.js` (`LAYOUTS`): each returns node
   positions and directed edges; the morphing, pulses and doodle rendering are shared.
 - Doodle icons are hand-drawn SVG paths in `site/assets/js/doodles.js`.

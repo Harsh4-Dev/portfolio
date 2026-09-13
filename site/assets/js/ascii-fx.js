@@ -59,13 +59,40 @@ export function scramble(el, opts = {}) {
   requestAnimationFrame(tick);
 }
 
-/* ------------------------------------------------------------------ rotating ASCII wireframe (icosahedron) */
+/* ------------------------------------------------------------------ rotating ASCII wireframes */
+const PHI = (1 + Math.sqrt(5)) / 2;
+function ring(n, r, y) { return Array.from({ length: n }, (_, i) => [Math.cos((i / n) * Math.PI * 2) * r, y, Math.sin((i / n) * Math.PI * 2) * r]); }
+const WIRES = {
+  ico: () => ({
+    V: [[-1, PHI, 0], [1, PHI, 0], [-1, -PHI, 0], [1, -PHI, 0], [0, -1, PHI], [0, 1, PHI], [0, -1, -PHI], [0, 1, -PHI], [PHI, 0, -1], [PHI, 0, 1], [-PHI, 0, -1], [-PHI, 0, 1]].map((v) => v.map((n) => n / PHI)),
+    E: [[0, 11], [0, 5], [0, 1], [0, 7], [0, 10], [1, 5], [5, 11], [11, 10], [10, 7], [7, 1], [3, 9], [3, 4], [3, 2], [3, 6], [3, 8], [4, 9], [2, 4], [6, 2], [8, 6], [9, 8], [4, 5], [4, 11], [2, 11], [2, 10], [6, 10], [6, 7], [8, 7], [8, 1], [9, 1], [9, 5]],
+  }),
+  cube: () => ({ V: [[-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1], [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]].map((v) => v.map((n) => n * 0.85)), E: [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]] }),
+  octa: () => ({ V: [[1.1, 0, 0], [-1.1, 0, 0], [0, 1.1, 0], [0, -1.1, 0], [0, 0, 1.1], [0, 0, -1.1]], E: [[0, 2], [0, 3], [0, 4], [0, 5], [1, 2], [1, 3], [1, 4], [1, 5], [2, 4], [4, 3], [3, 5], [5, 2]] }),
+  torus: () => {
+    const V = [], E = [], N = 14, M = 6;
+    for (let i = 0; i < N; i++) for (let j = 0; j < M; j++) {
+      const a = (i / N) * Math.PI * 2, b = (j / M) * Math.PI * 2, R = 0.85, r = 0.32;
+      V.push([(R + r * Math.cos(b)) * Math.cos(a), r * Math.sin(b), (R + r * Math.cos(b)) * Math.sin(a)]);
+      E.push([i * M + j, i * M + ((j + 1) % M)], [i * M + j, ((i + 1) % N) * M + j]);
+    }
+    return { V, E };
+  },
+  sphere: () => {
+    const V = [], E = [], LAT = 5, LON = 12;
+    for (let i = 1; i <= LAT; i++) { const t = (i / (LAT + 1)) * Math.PI; ring(LON, Math.sin(t) * 1.05, Math.cos(t) * 1.05).forEach((p) => V.push(p)); }
+    for (let i = 0; i < LAT; i++) for (let j = 0; j < LON; j++) { E.push([i * LON + j, i * LON + ((j + 1) % LON)]); if (i < LAT - 1) E.push([i * LON + j, (i + 1) * LON + j]); }
+    return { V, E };
+  },
+  tetra: () => ({ V: [[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]].map((v) => v.map((n) => n * 0.8)), E: [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]] }),
+};
+export const WIRE_SHAPES = Object.keys(WIRES);
+
 export function AsciiWire(pre, opts = {}) {
   const cols = opts.cols || 46, rows = opts.rows || 23;
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const phi = (1 + Math.sqrt(5)) / 2;
-  const V = [[-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0], [0, -1, phi], [0, 1, phi], [0, -1, -phi], [0, 1, -phi], [phi, 0, -1], [phi, 0, 1], [-phi, 0, -1], [-phi, 0, 1]].map((v) => v.map((n) => n / phi));
-  const E = [[0, 11], [0, 5], [0, 1], [0, 7], [0, 10], [1, 5], [5, 11], [11, 10], [10, 7], [7, 1], [3, 9], [3, 4], [3, 2], [3, 6], [3, 8], [4, 9], [2, 4], [6, 2], [8, 6], [9, 8], [4, 5], [4, 11], [2, 11], [2, 10], [6, 10], [6, 7], [8, 7], [8, 1], [9, 1], [9, 5]];
+  let { V, E } = WIRES[opts.shape || 'ico']();
+  let shapeName = opts.shape || 'ico', pending = null, scale = 1;
   let raf = 0, t = 0, running = false, speed = 1;
   const grid = new Array(cols * rows);
   function project(v, a, b) {
@@ -74,7 +101,7 @@ export function AsciiWire(pre, opts = {}) {
     const x1 = x0 * cy + z0 * sy, z1 = -x0 * sy + z0 * cy;
     const y1 = y0 * cx - z1 * sx, z2 = y0 * sx + z1 * cx;
     const d = 3.2 / (3.2 + z2 * 0.9);
-    return [Math.round((x1 * d * 0.42 + 0.5) * (cols - 1)), Math.round((y1 * d * 0.42 * 0.5 + 0.5) * (rows - 1)), z2];
+    return [Math.round((x1 * d * 0.42 * scale + 0.5) * (cols - 1)), Math.round((y1 * d * 0.42 * 0.5 * scale + 0.5) * (rows - 1)), z2];
   }
   function line(x0, y0, x1, y1, ch) {
     const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
@@ -92,18 +119,26 @@ export function AsciiWire(pre, opts = {}) {
     raf = requestAnimationFrame(frame);
     t += reduced ? 0 : 0.011 * speed;
     speed += (1 - speed) * 0.02;
+    if (pending) { scale -= 0.07; if (scale <= 0.05) { ({ V, E } = WIRES[pending]()); shapeName = pending; pending = null; scale = 0.05; } }
+    else if (scale < 1) scale = Math.min(1, scale + 0.05);
     grid.fill(' ');
     const P = V.map((v) => project(v, t, t * 0.6 + 0.4));
     for (const [a, b] of E) {
       const depth = (P[a][2] + P[b][2]) / 2;
       line(P[a][0], P[a][1], P[b][0], P[b][1], depth > 0.3 ? '.' : depth > -0.3 ? '+' : '#');
     }
-    for (const p of P) if (p[0] >= 0 && p[0] < cols && p[1] >= 0 && p[1] < rows) grid[p[1] * cols + p[0]] = '@';
+    if (V.length <= 12) for (const p of P) if (p[0] >= 0 && p[0] < cols && p[1] >= 0 && p[1] < rows) grid[p[1] * cols + p[0]] = '@';
     let s = '';
     for (let y = 0; y < rows; y++) s += grid.slice(y * cols, (y + 1) * cols).join('') + '\n';
     pre.textContent = s;
   }
-  return { start() { running = true; frame(); }, stop() { running = false; cancelAnimationFrame(raf); }, kick() { speed = 6; } };
+  return {
+    start() { running = true; frame(); },
+    stop() { running = false; cancelAnimationFrame(raf); },
+    kick() { speed = 6; },
+    setShape(name) { if (WIRES[name] && name !== shapeName && name !== pending) { pending = name; speed = 3; } },
+    get shape() { return shapeName; },
+  };
 }
 
 /* ------------------------------------------------------------------ animated character field (canvas) */

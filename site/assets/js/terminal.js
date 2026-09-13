@@ -7,7 +7,7 @@
  */
 import { esc, slug, splitList, splitLinks, yes, dateRange, fmtDate, md, plain, extraFields, img, hrefOf, initLiveReload, switchTheme } from './content.js';
 import { asciiText, resolveInto, measureCell } from './ascii.js';
-import { asciiImage, scramble, AsciiWire, CharField } from './ascii-fx.js';
+import { asciiImage, scramble, AsciiWire, WIRE_SHAPES, CharField } from './ascii-fx.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -134,16 +134,16 @@ function renderHero() {
         <p class="line dim">▼ scroll · <span class="acc">?</span> for shortcuts · <span class="acc">/</span> to type a command</p>
       </div>
     </div>
-    <pre class="hero-side" id="hero-side" aria-hidden="true"></pre>
   </section>`);
 }
 
-function renderSection(sec) {
+function renderSection(sec, index) {
   const items = C.data[sec.id] || [];
   const render = RENDERERS[sec.layout] || RENDERERS.cards;
   const cmd = (COMMANDS[sec.layout] || COMMANDS.cards)(sec);
   const body = items.length || sec.layout === 'text' ? render(sec, items) : `<p class="line err">${esc(fileName(sec))}: no entries yet — add rows to the "${esc(sec.id)}" sheet</p>`;
-  const node = el(`<section class="term-block" id="${esc(slug(sec.id))}">
+  const node = el(`<section class="term-block" id="${esc(slug(sec.id))}" data-index="${index}">
+    <p class="line rule">${'─'.repeat(3)} <b>${String(index + 1).padStart(2, '0')}</b> ${'─'.repeat(160)}</p>
     ${prompt(cmd)}
     <div class="out">
       <p class="line tag">${esc(sec.title.toLowerCase())}${sec.eyebrow ? ` <span class="dim">— ${esc(sec.eyebrow.toLowerCase())}</span>` : ''}</p>
@@ -206,15 +206,56 @@ async function typeCommand(node) {
   node.textContent = cmd;
 }
 
+async function printBlock(block) {
+  const cmd = $('.cmd[data-cmd]', block);
+  if (cmd) await typeCommand(cmd);
+  block.classList.add('in');
+  const lines = $$('.out > *', block);
+  if (reduced) lines.forEach((l) => l.classList.add('shown'));
+  else {
+    const caret = el('<span class="pcaret" aria-hidden="true"></span>');
+    const step = Math.max(18, Math.min(70, 900 / Math.max(1, lines.length)));
+    for (const l of lines) { l.classList.add('shown'); l.appendChild(caret); await wait(step); }
+    caret.remove();
+  }
+  animateBars(block);
+  animateCounts(block);
+  const r = block.getBoundingClientRect();
+  field?.pulse(r.left + 40, Math.max(60, r.top + 20));
+}
+
+function animateBars(block) {
+  $$('.tree .bar', block).forEach((bar, i) => {
+    const n = bar.textContent.length, off = bar.nextElementSibling;
+    const total = n + (off?.textContent.length || 0);
+    if (reduced || !n) return;
+    let k = 0;
+    const tick = () => { k++; bar.textContent = '█'.repeat(k); if (off) off.textContent = '░'.repeat(total - k); if (k < n) setTimeout(tick, 45); };
+    bar.textContent = ''; if (off) off.textContent = '░'.repeat(total);
+    setTimeout(tick, 120 + i * 60);
+  });
+}
+
+function animateCounts(block) {
+  $$('.stat-line b', block).forEach((b) => {
+    const raw = b.textContent, m = raw.match(/^([^\d]*)(\d[\d,]*)(\.\d+)?(.*)$/);
+    if (!m || reduced) return;
+    const pre = m[1], target = parseInt(m[2].replace(/,/g, ''), 10), dec = m[3] || '', post = m[4], t0 = performance.now();
+    b.classList.add('counting');
+    const tick = (now) => {
+      const p = Math.min(1, (now - t0) / 1100), e = 1 - Math.pow(1 - p, 3);
+      b.textContent = `${pre}${Math.round(target * e).toLocaleString()}${p === 1 ? dec : ''}${post}`;
+      if (p < 1) requestAnimationFrame(tick); else { b.textContent = raw; b.classList.remove('counting'); }
+    };
+    requestAnimationFrame(tick);
+  });
+}
+
 function initBlocks() {
-  const io = new IntersectionObserver((entries) => entries.forEach(async (e) => {
+  const io = new IntersectionObserver((entries) => entries.forEach((e) => {
     if (!e.isIntersecting) return;
     io.unobserve(e.target);
-    const cmd = $('.cmd[data-cmd]', e.target);
-    if (cmd) await typeCommand(cmd);
-    e.target.classList.add('in');
-    const r = e.target.getBoundingClientRect();
-    field?.pulse(r.left + 40, Math.max(60, r.top + 20));
+    printBlock(e.target);
   }), { rootMargin: '0px 0px -12% 0px', threshold: 0.02 });
   $$('.term-block').forEach((b) => io.observe(b));
 }
@@ -225,7 +266,11 @@ function initActiveTabs() {
     if (!e.isIntersecting) return;
     const isHero = e.target.id === 'top';
     tabs.forEach((a) => a.classList.toggle('active', a.dataset.for === e.target.id));
-    field?.setIntensity(isHero ? 1 : 0.55);
+    field?.setIntensity(isHero ? 1 : 0.7);
+    const idx = isHero ? 0 : Number(e.target.dataset.index) + 1;
+    wire?.setShape(WIRE_SHAPES[idx % WIRE_SHAPES.length]);
+    const cap = $('#side-cap');
+    if (cap) cap.textContent = isHero ? `${PS} $ whoami` : `${PS} $ ${$('.cmd', e.target)?.dataset.cmd || $('.cmd', e.target)?.textContent || ''}`;
   }), { rootMargin: '-40% 0px -45% 0px', threshold: 0 });
   io.observe($('#top'));
   $$('.term-block').forEach((s) => io.observe(s));
@@ -256,7 +301,7 @@ async function initSide() {
       return;
     } catch { /* fall through to the wireframe */ }
   }
-  wire = AsciiWire(pre, { cols: 46, rows: 23 });
+  wire = AsciiWire(pre, { cols: 46, rows: 23, shape: 'ico' });
   wire.start();
 }
 
@@ -437,9 +482,12 @@ export async function bootTerminal(content) {
   main.innerHTML = '';
   main.className = 'term-body';
   document.body.insertBefore(renderBar(), main);
-  main.appendChild(renderHero());
-  SECTIONS.forEach((s) => main.appendChild(renderSection(s)));
-  main.appendChild(el(`<p class="line dim">${esc(S.footer_note || '')} — generated from ${esc(C.source || 'content.xlsx')} · ${esc((C.generated_at || '').slice(0, 10))}</p>`));
+  const col = el('<div class="term-col" id="term-col"></div>');
+  main.appendChild(col);
+  col.appendChild(renderHero());
+  SECTIONS.forEach((s, i) => col.appendChild(renderSection(s, i)));
+  col.appendChild(el(`<p class="line dim">${esc(S.footer_note || '')} — generated from ${esc(C.source || 'content.xlsx')} · ${esc((C.generated_at || '').slice(0, 10))}</p>`));
+  main.appendChild(el(`<aside class="side" aria-hidden="true"><pre class="hero-side" id="hero-side"></pre><p class="line side-cap" id="side-cap">${esc(PS)} $ whoami</p></aside>`));
   document.body.appendChild(renderCli());
   if (yes(S.terminal_scanlines ?? 'yes')) document.body.appendChild(el('<div class="scanlines" aria-hidden="true"></div>'));
 
