@@ -13,7 +13,7 @@
  *   transformer   2017  stacked token rows, every token attends to every token
  *   constellation now   a knowledge graph
  *
- * API:  const s = createScene(canvas, { palette, density, asideOpacity })
+ * API:  const s = createScene(canvas, { palette, density, asideOpacity, renderScale, preserveDrawingBuffer })
  *       s.setShape('cnn'); s.setMode('hero'|'aside'); s.burst(); s.setPalette(p); s.destroy()
  */
 import * as THREE from 'three';
@@ -229,7 +229,8 @@ export function createScene(canvas, opts = {}) {
   let palette = normalisePalette(opts.palette);
   const asideOpacity = opts.asideOpacity ?? 0.45;
 
-  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance' });
+  const renderScale = opts.renderScale || 1;
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance', preserveDrawingBuffer: !!opts.preserveDrawingBuffer });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setClearColor(0x000000, 0);
   const scene = new THREE.Scene();
@@ -344,10 +345,10 @@ export function createScene(canvas, opts = {}) {
     const w = canvas.clientWidth || window.innerWidth || 1;
     const h = canvas.clientHeight || window.innerHeight || 1;
     if (w < 2 || h < 2) return;
-    renderer.setSize(w, h, false);
+    renderer.setSize(Math.round(w * renderScale), Math.round(h * renderScale), false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    uni.uScale.value = (h * renderer.getPixelRatio()) / (2 * Math.tan((FOV * Math.PI) / 360));
+    uni.uScale.value = (h * renderScale * renderer.getPixelRatio()) / (2 * Math.tan((FOV * Math.PI) / 360));
     Object.assign(want, layoutOffsets());
   }
 

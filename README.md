@@ -25,6 +25,11 @@ ml-portfolio/
 └── .github/workflows/deploy.yml   ← builds & deploys on every push
 ```
 
+Two themes share the same workbook: **paper** (cream, doodles, 3D diagrams) and **terminal** (a dark
+CLI transcript with typed commands, an ASCII banner, the diagrams rendered live as ASCII and a
+working prompt — try `help`). `Settings.theme` picks the one GitHub Pages serves; visitors can
+toggle. `SETUP.md` is the step-by-step walkthrough.
+
 ## 1. Run it locally
 
 ```bash
@@ -89,6 +94,21 @@ Other knobs in `Settings`: `color_*` (cream / ink / four accents), `font_display
 `font_body` (any Google Font), `scene_density` (low / medium / high), `scene_opacity_sections`,
 `show_grain`, `show_journey_rail`, `roles` (rotating words), `availability` pill, CTAs, `resume_url`.
 
+### Themes
+
+| Setting | Meaning |
+|---|---|
+| `theme` | `paper` or `terminal` — the theme the site opens with (and what GitHub Pages serves) |
+| `theme_toggle` | yes/no — show the switch in the header |
+| `terminal_user` | prompt text, e.g. `harsh@portfolio` |
+| `terminal_bg`, `terminal_fg`, `terminal_dim`, `terminal_accent`, `terminal_accent_2` | terminal colours |
+| `terminal_font` | any Google monospace font (default JetBrains Mono) |
+| `terminal_scanlines` | yes/no — CRT scanline overlay |
+
+A visitor's choice is remembered in their browser; `?theme=terminal` / `?theme=paper` in the URL
+forces one. The terminal prompt understands `help`, `ls`, `cat <section>`, `open <project>`,
+`theme paper`, `cv`, `email`, `top`, `clear`.
+
 ### Images
 
 Drop files in `site/assets/img/` and refer to them by file name (`me.jpg`) in `image`, `images`
@@ -111,8 +131,10 @@ alone is enough; the workflow regenerates the JSON.
 
 ## Customising further
 
-- Layout renderers are small functions in `site/assets/js/app.js` (`RENDERERS`). Add one, and the
-  new `layout` value is available in the `Sections` sheet.
+- Layout renderers are small functions in `site/assets/js/app.js` (`RENDERERS`) for the paper theme
+  and `site/assets/js/terminal.js` for the terminal theme. Add one in each, and the new `layout`
+  value is available in the `Sections` sheet.
+- The ASCII conversion (banner from a real font, live WebGL→characters) is `site/assets/js/ascii.js`.
 - Architectures for the scene are in `site/assets/js/scene.js` (`LAYOUTS`): each returns node
   positions and directed edges; the morphing, pulses and doodle rendering are shared.
 - Doodle icons are hand-drawn SVG paths in `site/assets/js/doodles.js`.

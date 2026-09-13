@@ -156,3 +156,39 @@ export const hrefOf = (v) => {
   if (s.includes('@')) return `mailto:${s}`;
   return s;
 };
+
+/** Poll studio.py for workbook changes (the endpoint does not exist on GitHub Pages, so this is a no-op there). */
+export function initLiveReload() {
+  let stamp = null;
+  const poll = async () => {
+    try {
+      const r = await fetch('/__studio/version', { cache: 'no-store' });
+      if (!r.ok) return;
+      const v = (await r.json()).version;
+      if (stamp && v !== stamp) location.reload();
+      stamp = v;
+      setTimeout(poll, 1500);
+    } catch { /* not served by studio.py */ }
+  };
+  poll();
+}
+
+export const THEMES = ['paper', 'terminal'];
+
+/** Which theme to show: ?theme= in the URL, then the visitor's saved choice, then Settings.theme. */
+export function resolveTheme(settings) {
+  const url = new URLSearchParams(location.search).get('theme');
+  let saved = null;
+  try { saved = localStorage.getItem('theme'); } catch { /* storage blocked */ }
+  const def = String(settings.theme || 'paper').trim().toLowerCase();
+  for (const t of [url, saved, def]) if (THEMES.includes(t)) return t;
+  return 'paper';
+}
+
+export function switchTheme(theme) {
+  try { localStorage.setItem('theme', theme); } catch { /* ignore */ }
+  const u = new URL(location.href);
+  u.searchParams.set('theme', theme);
+  u.hash = '';
+  location.href = u.toString();
+}

@@ -2,7 +2,7 @@
  * app.js — renders content.json into the page and wires the 3D journey to scrolling.
  * Layout renderers live in RENDERERS; add one there to support a new `layout` value.
  */
-import { loadContent, esc, slug, splitList, splitLinks, yes, dateRange, fmtDate, md, plain, themeColor, cycleColor, applyTheme, extraFields, img, hrefOf } from './content.js';
+import { loadContent, esc, slug, splitList, splitLinks, yes, dateRange, fmtDate, md, plain, themeColor, cycleColor, applyTheme, extraFields, img, hrefOf, initLiveReload, resolveTheme, switchTheme } from './content.js';
 import { doodle, isDoodle, guessIcon } from './doodles.js';
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -153,10 +153,12 @@ const RENDERERS = {
 // ---------------------------------------------------------------- page pieces
 function renderNav() {
   const cta = S.secondary_cta_label ? `<a class="btn btn-sm nav-cta" href="${esc(hrefOf(S.secondary_cta_link || 'cv.html'))}">${doodle('download')}${esc(S.secondary_cta_label)}</a>` : '';
+  const toggle = yes(S.theme_toggle ?? 'yes') ? `<button class="btn btn-sm nav-cta theme-toggle" id="theme-toggle" title="Switch to the terminal theme">${doodle('code')}Terminal</button>` : '';
   $('#nav').innerHTML = `
     <a class="logo" href="#top" aria-label="Back to top"><span class="logo-mark">${doodle('circle')}${esc(S.initials || (S.name || 'P').split(' ').map((w) => w[0]).join('').slice(0, 2))}</span><span class="logo-name">${esc(S.first_name || S.name || '')}</span></a>
     <button class="burger" id="burger" aria-label="Menu" aria-expanded="false">${doodle('menu')}</button>
-    <nav class="nav-links" id="nav-links">${SECTIONS.map((s) => `<a href="#${esc(slug(s.id))}" data-for="${esc(slug(s.id))}">${esc(s.title)}</a>`).join('')}${cta}</nav>`;
+    <nav class="nav-links" id="nav-links">${SECTIONS.map((s) => `<a href="#${esc(slug(s.id))}" data-for="${esc(slug(s.id))}">${esc(s.title)}</a>`).join('')}${cta}${toggle}</nav>`;
+  $('#theme-toggle')?.addEventListener('click', () => switchTheme('terminal'));
   $('#burger').addEventListener('click', () => { const n = $('#nav'); n.classList.toggle('open'); $('#burger').setAttribute('aria-expanded', n.classList.contains('open')); });
   $('#nav-links').addEventListener('click', (e) => { if (e.target.tagName === 'A') $('#nav').classList.remove('open'); });
   addEventListener('scroll', () => $('#nav').classList.toggle('scrolled', scrollY > 30), { passive: true });
@@ -386,22 +388,6 @@ async function initScene() {
   }
 }
 
-function initLiveReload() {
-  // only when served by studio.py — the endpoint does not exist on GitHub Pages
-  let stamp = null;
-  const poll = async () => {
-    try {
-      const r = await fetch('/__studio/version', { cache: 'no-store' });
-      if (!r.ok) return;
-      const v = (await r.json()).version;
-      if (stamp && v !== stamp) location.reload();
-      stamp = v;
-      setTimeout(poll, 1500);
-    } catch { /* not in studio */ }
-  };
-  poll();
-}
-
 function showError(err) {
   $('#main').innerHTML = `<div class="error sketch"><h2 class="hand" style="font-size:2rem;margin:0 0 .5rem">Could not load content.json</h2>
     <p>Run <code>python studio.py</code> (or <code>python tools/build_content.py</code>) so the site has content to show. Opening index.html straight from the file system does not work — it needs a web server.</p><pre>${esc(err.message || err)}</pre></div>`;
@@ -411,6 +397,12 @@ function showError(err) {
 async function main() {
   try { C = await loadContent(); } catch (e) { showError(e); return; }
   S = C.settings || {};
+  if (resolveTheme(S) === 'terminal') {
+    const mod = await import('./terminal.js');
+    mod.bootTerminal(C);
+    return;
+  }
+  document.body.classList.add('theme-paper');
   JOURNEY = C.journey || [];
   ERA_BY_ID = Object.fromEntries(JOURNEY.map((j) => [j.id, j]));
   LINKS = C.links || [];

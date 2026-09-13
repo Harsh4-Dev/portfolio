@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-13T10:25:25Z",
+  "generated_at": "2026-09-13T10:45:58Z",
   "source": "content.xlsx",
   "settings": {
     "site_title": "Harshavardhan S - AI Systems Engineer",
@@ -39,7 +39,17 @@
     "scene_density": "medium",
     "scene_opacity_sections": "0.55",
     "show_grain": "yes",
-    "cv_title": "Curriculum Vitae"
+    "cv_title": "Curriculum Vitae",
+    "theme": "paper",
+    "theme_toggle": "yes",
+    "terminal_user": "harsh@portfolio",
+    "terminal_bg": "#0b0d10",
+    "terminal_fg": "#d9dee4",
+    "terminal_dim": "#6f7a86",
+    "terminal_accent": "#7dd3a0",
+    "terminal_accent_2": "#f2c86b",
+    "terminal_scanlines": "yes",
+    "terminal_font": "JetBrains Mono"
   },
   "journey": [
     {

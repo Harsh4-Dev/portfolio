@@ -110,6 +110,16 @@ SETTINGS = [
     ["scene_opacity_sections", "0.55", "How visible the 3D network stays behind the content (0-1)"],
     ["show_grain", "yes", "Paper grain texture"],
     ["cv_title", "Curriculum Vitae", "Heading on cv.html"],
+    ["theme", "paper", "Which theme the site opens with: paper (cream, doodles, 3D) or terminal (dark CLI, ASCII). This is what GitHub Pages serves."],
+    ["theme_toggle", "yes", "yes/no - let visitors switch between the two themes"],
+    ["terminal_user", "harsh@portfolio", "Prompt shown in the terminal theme"],
+    ["terminal_bg", "#0b0d10", "Terminal background"],
+    ["terminal_fg", "#d9dee4", "Terminal text"],
+    ["terminal_dim", "#6f7a86", "Terminal muted text"],
+    ["terminal_accent", "#7dd3a0", "Terminal accent (links, prompt)"],
+    ["terminal_accent_2", "#f2c86b", "Terminal second accent (years, keys)"],
+    ["terminal_scanlines", "yes", "yes/no - CRT scanline overlay in the terminal theme"],
+    ["terminal_font", "JetBrains Mono", "Any Google monospace font"],
 ]
 
 SECTIONS_HDR = ["id", "title", "eyebrow", "intro", "layout", "order", "era", "doodle", "columns", "visible", "cta_label", "cta_link"]
