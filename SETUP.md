@@ -87,10 +87,12 @@ One-time:
    (`https://github.com/<you>/<repo>.git`) and click **Connect GitHub**.
 4. Click **Publish to GitHub**. The first push may ask you to sign in to GitHub — sign in in the
    window that appears (Git Credential Manager handles this on Windows/macOS).
-5. On GitHub open the repository → **Settings → Pages → Build and deployment → Source** and choose
-   **GitHub Actions**. This is the only setting you need to touch.
-6. Watch the **Actions** tab: the "Build & deploy portfolio" workflow runs for about a minute.
-   The site is then live at `https://<you>.github.io/<repo>/` (the dashboard shows the link).
+5. Watch the **Actions** tab: the "Build & deploy portfolio" workflow runs for about a minute and
+   switches Pages on by itself. The site is then live at `https://<you>.github.io/<repo>/`
+   (the dashboard shows the link).
+6. Only if that run fails at the "configure-pages" step: open the repository →
+   **Settings → Pages → Build and deployment → Source** → **GitHub Actions**, then re-run the
+   workflow from the Actions tab.
 
 Every time after that: edit the workbook → save → **Publish**. Nothing else. The workflow
 regenerates `content.json` from `content.xlsx` on GitHub's side, so committing the workbook alone

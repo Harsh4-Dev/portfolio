@@ -217,9 +217,10 @@ One-time setup:
    `https://<you>.github.io/portfolio/`; or `<you>.github.io` → site at `https://<you>.github.io/`.
 3. Studio → GitHub card → paste `https://github.com/<you>/<repo>.git` → **Connect GitHub**.
 4. Studio → **Publish to GitHub**. First time, Git opens a sign-in window; sign in.
-5. GitHub → your repo → **Settings → Pages → Build and deployment → Source: GitHub Actions**.
-6. Repo → **Actions** tab: "Build & deploy portfolio" runs (~1 minute). The studio shows the live
-   URL.
+5. Repo → **Actions** tab: "Build & deploy portfolio" runs (~1 minute) and switches Pages on by
+   itself. The studio then shows the live URL.
+6. Only if that run fails at "configure-pages": **Settings → Pages → Build and deployment →
+   Source: GitHub Actions**, then re-run the workflow from the Actions tab.
 
 Every later change: save the workbook → check the preview → **Publish**. That is the whole loop.
 Committing only `content.xlsx` is enough: the workflow rebuilds `content.json` on the runner and
@@ -269,7 +270,8 @@ Adding an architecture = one function in `layouts.js`.
 | A Text row has no effect | The key must match exactly (see the `note` column); an empty value means "use default". |
 | Publish: "Please tell me who you are" | Run the two `git config --global` commands from §6. |
 | Publish: authentication failed | Sign in when Git asks, or use a GitHub personal access token as the password. |
-| Site not updating after a push | Settings → Pages → Source must be **GitHub Actions**; then check the Actions tab. |
+| Site not updating after a push | Check the Actions tab for a red run. If "configure-pages" failed, set Settings → Pages → Source to **GitHub Actions** and re-run. |
+| Visitors still see the other theme | With `theme_toggle` = no the Settings theme always wins, including for people who switched on an earlier visit. With it set to yes, their saved choice is remembered. |
 | A page you disabled is still online | Wait for the next Actions run to finish; hard-refresh (Ctrl+F5). |
 | No 3D scene / no fonts | The browser blocked `cdn.jsdelivr.net` or Google Fonts; everything else still works. |
 | Terminal theme shows nothing after the boot lines | Press any key — the boot is skippable; if it still hangs, set `terminal_boot` = no. |
