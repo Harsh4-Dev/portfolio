@@ -192,10 +192,12 @@ export const THEMES = ['paper', 'terminal'];
 
 /** Which theme to show: ?theme= in the URL, then the visitor's saved choice, then Settings.theme. */
 export function resolveTheme(settings) {
+  const def = String(settings.theme || 'paper').trim().toLowerCase();
+  // theme_toggle = no means visitors cannot switch, so Settings wins over any saved or URL choice
+  if (!flag(settings, 'theme_toggle')) return THEMES.includes(def) ? def : 'paper';
   const url = new URLSearchParams(location.search).get('theme');
   let saved = null;
   try { saved = localStorage.getItem('theme'); } catch { /* storage blocked */ }
-  const def = String(settings.theme || 'paper').trim().toLowerCase();
   for (const t of [url, saved, def]) if (THEMES.includes(t)) return t;
   return 'paper';
 }

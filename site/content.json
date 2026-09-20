@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-13T11:38:25Z",
+  "generated_at": "2026-09-20T06:34:44Z",
   "source": "content.xlsx",
   "settings": {
     "site_title": "Harshavardhan S - AI Systems Engineer",
@@ -40,8 +40,8 @@
     "scene_opacity_sections": "0.55",
     "show_grain": "yes",
     "cv_title": "Curriculum Vitae",
-    "theme": "paper",
-    "theme_toggle": "yes",
+    "theme": "terminal",
+    "theme_toggle": "no",
     "terminal_user": "harsh@portfolio",
     "terminal_bg": "#000000",
     "terminal_fg": "#ffffff",
