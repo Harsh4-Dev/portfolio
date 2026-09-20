@@ -42,8 +42,9 @@ If the port is taken: `python studio.py --port 8080`. To skip opening the browse
 5. Add a section: create a new sheet, give it a header row, add a row to `Sections` for it.
 6. Images: copy files into `site/assets/img/` and write the file name in an `image` column or in
    `Settings.avatar`. The dashboard's status card warns about names that do not exist.
-7. Replace `site/assets/Harshavardhan-S-Resume.pdf` with your own PDF and point
-   `Settings.resume_url` at it (or leave it blank to use the generated `cv.html`).
+7. To offer a resume PDF, drop it in `site/assets/` and point `Settings.resume_url` at it
+   (e.g. `assets/resume.pdf`). Leave `resume_url` blank for no resume link. Remember that anything
+   under `site/` is published publicly.
 
 The dashboard's **Status** shows warnings from the builder (unknown layout, missing image, empty
 section). "all good" means the workbook is clean.

@@ -170,7 +170,9 @@ with `id` = `Talks`, a layout (`list`), an order. Optional: an `era`, a `command
 **Add a photo** → put `me.jpg` in `site/assets/img/`, set `Settings.avatar` = `me.jpg`. Paper
 theme shows it in the About section; terminal theme renders it as an ASCII portrait.
 
-**Replace the CV PDF** → put the file in `site/assets/`, set `resume_url` = `assets/YourName.pdf`.
+**Offer a resume PDF** → put the file in `site/assets/`, set `resume_url` = `assets/resume.pdf`.
+Everything under `site/` is published, so keep private documents out of it (the project's `private/`
+folder is gitignored for exactly that).
 
 **Switch theme for the public site** → `Settings.theme` = `terminal` or `paper`.
 
