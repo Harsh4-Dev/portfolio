@@ -159,6 +159,9 @@ export const hrefOf = (v) => {
 
 /** Poll studio.py for workbook changes (the endpoint does not exist on GitHub Pages, so this is a no-op there). */
 export function initLiveReload() {
+  // studio.py only ever serves this from localhost; skipping elsewhere keeps a 404 out of the
+  // console on the published site
+  if (!['localhost', '127.0.0.1', '[::1]', '::1'].includes(location.hostname)) return;
   let stamp = null;
   const poll = async () => {
     try {
