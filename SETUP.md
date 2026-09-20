@@ -90,9 +90,10 @@ One-time:
 5. Watch the **Actions** tab: the "Build & deploy portfolio" workflow runs for about a minute and
    switches Pages on by itself. The site is then live at `https://<you>.github.io/<repo>/`
    (the dashboard shows the link).
-6. Only if that run fails at the "configure-pages" step: open the repository →
-   **Settings → Pages → Build and deployment → Source** → **GitHub Actions**, then re-run the
-   workflow from the Actions tab.
+6. Open the repository → **Settings → Pages → Build and deployment** and confirm **Source** is
+   **GitHub Actions**. If it says *Deploy from a branch*, change it: otherwise GitHub also runs its
+   own Jekyll build on the repo root, the two deployments race, and the site alternates between
+   your portfolio and a rendered README.
 
 Every time after that: edit the workbook → save → **Publish**. Nothing else. The workflow
 regenerates `content.json` from `content.xlsx` on GitHub's side, so committing the workbook alone

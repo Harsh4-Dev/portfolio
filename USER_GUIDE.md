@@ -271,6 +271,7 @@ Adding an architecture = one function in `layouts.js`.
 | Publish: "Please tell me who you are" | Run the two `git config --global` commands from §6. |
 | Publish: authentication failed | Sign in when Git asks, or use a GitHub personal access token as the password. |
 | Site not updating after a push | Check the Actions tab for a red run. If "configure-pages" failed, set Settings → Pages → Source to **GitHub Actions** and re-run. |
+| The site flips between the portfolio and the rendered README | The repository's Pages source is still **Deploy from a branch**, so GitHub's own "pages build and deployment" (Jekyll) publishes the repo root while this workflow publishes `site/`. They race and the last one wins. Set Settings → Pages → Build and deployment → Source to **GitHub Actions**; the Jekyll build then stops and only the workflow deploys. |
 | Visitors still see the other theme | With `theme_toggle` = no the Settings theme always wins, including for people who switched on an earlier visit. With it set to yes, their saved choice is remembered. |
 | A page you disabled is still online | Wait for the next Actions run to finish; hard-refresh (Ctrl+F5). |
 | No 3D scene / no fonts | The browser blocked `cdn.jsdelivr.net` or Google Fonts; everything else still works. |
